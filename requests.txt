@@ -1,0 +1,18 @@
+Some of the tests I think would be helpful:
+
+Test memory (might be able to re-assemble stress12 for this
+
+Test that each task works (load up both tasks with similar memory maps and check to see that the map changes when the task changes
+
+Test that CRM works across two tasks
+
+Test that CRM memory is really the next to highest page in the $3f bank
+
+Test reading MMU registers back (6 bits read, 8 bits read)
+
+Test that $ff9d/9e GFX memory offset works correctly (right now, not sure if VDG emulation in CC3 uses this offset or not), but whatever it does, the CC2+CoCoMEMJr needs to do the same
+
+If you set VDG to 127*512 as the base offset, and set up a 6kB hi res screen, does VDG memory accesses above $ffff wrap to $0000 or $010000?
+
+
+The actual memory test (#1) is actually the least of my concerns.  It's the other stuff I need to test.
