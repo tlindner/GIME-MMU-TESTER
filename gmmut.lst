@@ -1,138 +1,193 @@
                       (        gmmut.asm):00001          PRAGMA autobranchlength
                       (        gmmut.asm):00002          org $6000
 6000                  (        gmmut.asm):00003         input rmb 1
-6001                  (        gmmut.asm):00004         start
-6001 B66000           (        gmmut.asm):00005          lda input
-6004 8106             (        gmmut.asm):00006          cmpa #6
-6006 10270000         (        gmmut.asm):00007          beq vdg_wrap
-                      (        gmmut.asm):00008          
-600A                  (        gmmut.asm):00009         vdg_wrap
-600A 0F71             (        gmmut.asm):00010          clr $71
-600C 170064           (        gmmut.asm):00011          bsr turn_off_ints
-600F 170091           (        gmmut.asm):00012          bsr save_task_0
-                      (        gmmut.asm):00013         # set VDG to highest base address
-6012 B7FFC7           (        gmmut.asm):00014          sta $ffc7
-6015 B7FFC9           (        gmmut.asm):00015          sta $ffc9
-6018 B7FFCB           (        gmmut.asm):00016          sta $ffcb
-601B B7FFCD           (        gmmut.asm):00017          sta $ffcd
-601E B7FFCF           (        gmmut.asm):00018          sta $ffcf
-6021 B7FFD1           (        gmmut.asm):00019          sta $ffd1
-6024 B7FFD3           (        gmmut.asm):00020          sta $ffd3
-6027 8E602F           (        gmmut.asm):00021          ldx #vdg_wait
-602A C644             (        gmmut.asm):00022          ldb #vdg_end-vdg_wait
-602C 17008C           (        gmmut.asm):00023          bsr move_to_constant_ram_and_execute
-                      (        gmmut.asm):00024         # no return
-                      (        gmmut.asm):00025          
-602F                  (        gmmut.asm):00026         vdg_wait
-                      (        gmmut.asm):00027         # set mmu task 0 to all zeros
-602F 8637             (        gmmut.asm):00028          lda #$3f-8
-6031 B7FFA0           (        gmmut.asm):00029          sta $ffa0
-6034 8640             (        gmmut.asm):00030          lda #$3f+1
-6036 B7FFA1           (        gmmut.asm):00031          sta $ffa1
-6039 0F00             (        gmmut.asm):00032          clr $0000
-603B 86FF             (        gmmut.asm):00033          lda #$ff
-603D B72000           (        gmmut.asm):00034          sta $2000
-6040 B7FE00           (        gmmut.asm):00035          sta $fe00
-6043 8E0000           (        gmmut.asm):00036          ldx #$0
-6046                  (        gmmut.asm):00037         vdg_loop
-6046 3001             (        gmmut.asm):00038          leax 1,x
-6048 26FC             (        gmmut.asm):00039          bne vdg_loop
-604A 0300             (        gmmut.asm):00040          com $0000
-604C 732000           (        gmmut.asm):00041          com $2000
-604F 73FE00           (        gmmut.asm):00042          com $fe00
-6052 20F2             (        gmmut.asm):00043          bra vdg_loop
-                      (        gmmut.asm):00044         # reset 
-6054 BEFFFE           (        gmmut.asm):00045          ldx $fffe
-                      (        gmmut.asm):00046          
-                      (        gmmut.asm):00047         # put roms in MMU 
-6057 863C             (        gmmut.asm):00048          lda #$3c
-6059 B7FFA4           (        gmmut.asm):00049          sta $ffa4
-605C 863D             (        gmmut.asm):00050          lda #$3d
-605E B7FFA5           (        gmmut.asm):00051          sta $ffa5
-6061 863E             (        gmmut.asm):00052          lda #$3e
-6063 B7FFA6           (        gmmut.asm):00053          sta $ffa6
-6066 863F             (        gmmut.asm):00054          lda #$3f
-6068 B7FFA7           (        gmmut.asm):00055          sta $ffa7
-                      (        gmmut.asm):00056         
-                      (        gmmut.asm):00057         # set rom mode 
-606B B7FFD4           (        gmmut.asm):00058          sta $ffd4
-606E B7FFDE           (        gmmut.asm):00059          sta $ffde
-                      (        gmmut.asm):00060         # cold/warm restart 
-6071 1F15             (        gmmut.asm):00061          tfr x,pc
-6073                  (        gmmut.asm):00062         vdg_end
-                      (        gmmut.asm):00063         
-                      (        gmmut.asm):00064         #
-                      (        gmmut.asm):00065         # subroutine
-                      (        gmmut.asm):00066         # turn off all interrupts
-                      (        gmmut.asm):00067         #
-6073                  (        gmmut.asm):00068         turn_off_ints
-                      (        gmmut.asm):00069         # turn off pia0 ints
-6073 4F               (        gmmut.asm):00070          clra
-6074 B7FF01           (        gmmut.asm):00071          sta $ff01
-6077 B7FF03           (        gmmut.asm):00072          sta $ff03
-                      (        gmmut.asm):00073         # turn off pia1 ints
-607A 4F               (        gmmut.asm):00074          clra
-607B B7FF21           (        gmmut.asm):00075          sta $ff21
-607E B7FF23           (        gmmut.asm):00076          sta $ff23
-                      (        gmmut.asm):00077         # turn off gime ints
-6081 86CC             (        gmmut.asm):00078          lda #$cc
-6083 84CF             (        gmmut.asm):00079          anda #%11001111
-6085 B7FF90           (        gmmut.asm):00080          sta $ff90
-6088 39               (        gmmut.asm):00081          rts
-                      (        gmmut.asm):00082         
-                      (        gmmut.asm):00083         
-                      (        gmmut.asm):00084         #
-                      (        gmmut.asm):00085         # subroutine
-                      (        gmmut.asm):00086         # turn on all interrupts
-                      (        gmmut.asm):00087         #
-6089                  (        gmmut.asm):00088         turn_on_ints
-                      (        gmmut.asm):00089         # turn on pia0 ints
-6089 8634             (        gmmut.asm):00090          lda #$34
-608B B7FF01           (        gmmut.asm):00091          sta $ff01
-608E 86B5             (        gmmut.asm):00092          lda #$b5
-6090 B7FF03           (        gmmut.asm):00093          sta $ff03
-                      (        gmmut.asm):00094         
-                      (        gmmut.asm):00095         # turn on pia1 ints
-6093 8634             (        gmmut.asm):00096          lda #$34
-6095 B7FF21           (        gmmut.asm):00097          sta $ff21
-6098 8637             (        gmmut.asm):00098          lda #$37
-609A B7FF23           (        gmmut.asm):00099          sta $ff23
-                      (        gmmut.asm):00100         # turn on gime ints
-609D 86CC             (        gmmut.asm):00101          lda #$cc
-609F B7FF90           (        gmmut.asm):00102          sta $ff90
-60A2 39               (        gmmut.asm):00103          rts
-                      (        gmmut.asm):00104          
-60A3                  (        gmmut.asm):00105         save_task_0
-                      (        gmmut.asm):00106         #
-                      (        gmmut.asm):00107         # subroutine
-                      (        gmmut.asm):00108         # save mmu regs at ffa0
-                      (        gmmut.asm):00109         #
-60A3 108EFFA0         (        gmmut.asm):00110                 ldy #$ffa0
-60A7 8EFE00           (        gmmut.asm):00111                 ldx #saved_task
-60AA ECA1             (        gmmut.asm):00112                 ldd ,y++
-60AC ED81             (        gmmut.asm):00113                 std ,x++
-60AE ECA1             (        gmmut.asm):00114                 ldd ,y++
-60B0 ED81             (        gmmut.asm):00115                 std ,x++
-60B2 ECA1             (        gmmut.asm):00116                 ldd ,y++
-60B4 ED81             (        gmmut.asm):00117                 std ,x++
-60B6 ECA1             (        gmmut.asm):00118                 ldd ,y++
-60B8 ED81             (        gmmut.asm):00119                 std ,x++
-60BA 39               (        gmmut.asm):00120                 rts
-                      (        gmmut.asm):00121         
-60BB                  (        gmmut.asm):00122         move_to_constant_ram_and_execute
-60BB CEFE08           (        gmmut.asm):00123          ldu #code
-60BE                  (        gmmut.asm):00124         move_loop
-60BE A680             (        gmmut.asm):00125          lda ,x+
-60C0 A7C0             (        gmmut.asm):00126          sta ,u+
-60C2 5A               (        gmmut.asm):00127          decb
-60C3 10270002         (        gmmut.asm):00128          beq move_done
-60C7 20F5             (        gmmut.asm):00129          bra move_loop
-60C9                  (        gmmut.asm):00130         move_done
-60C9 7EFE08           (        gmmut.asm):00131          jmp code
-                      (        gmmut.asm):00132         # no return
-                      (        gmmut.asm):00133         
-                      (        gmmut.asm):00134          org $fe00
-FE00                  (        gmmut.asm):00135         saved_task rmb 8
-     FE08             (        gmmut.asm):00136         code equ *
-                      (        gmmut.asm):00137         
-                      (        gmmut.asm):00138          end start
+6001                  (        gmmut.asm):00004         output rmb 1
+6002                  (        gmmut.asm):00005         start
+6002 B66000           (        gmmut.asm):00006          lda input
+6005 8103             (        gmmut.asm):00007          cmpa #3
+6007 10270007         (        gmmut.asm):00008          beq count_mmu_blocks
+600B 8106             (        gmmut.asm):00009          cmpa #6
+600D 10270044         (        gmmut.asm):00010          beq vdg_wrap
+                      (        gmmut.asm):00011         # nothing to do exit.
+6011 39               (        gmmut.asm):00012          rts
+                      (        gmmut.asm):00013         
+6012                  (        gmmut.asm):00014         count_mmu_blocks
+6012 1700BB           (        gmmut.asm):00015          bsr turn_off_ints
+6015 1700E8           (        gmmut.asm):00016          bsr save_task_0
+                      (        gmmut.asm):00017         # Put mmu block number
+                      (        gmmut.asm):00018         # in first byte of each block
+6018 5F               (        gmmut.asm):00019          clrb
+6019 8E6230           (        gmmut.asm):00020          ldx #buffer2
+601C                  (        gmmut.asm):00021         count_bocks_loop
+601C F7FFA0           (        gmmut.asm):00022          stb $ffa0
+601F B60000           (        gmmut.asm):00023          lda >$0
+6022 A780             (        gmmut.asm):00024          sta ,x+
+6024 F70000           (        gmmut.asm):00025          stb >$0
+6027 5C               (        gmmut.asm):00026          incb
+6028 26F2             (        gmmut.asm):00027          bne count_bocks_loop
+                      (        gmmut.asm):00028         # fill buffer with what is
+                      (        gmmut.asm):00029         # left in the first byte of each block
+602A 5F               (        gmmut.asm):00030          clrb
+602B 8E6130           (        gmmut.asm):00031          ldx #buffer
+602E                  (        gmmut.asm):00032         count_loop
+602E F7FFA0           (        gmmut.asm):00033          stb $ffa0
+6031 B60000           (        gmmut.asm):00034          lda >$0
+6034 A780             (        gmmut.asm):00035          sta ,x+
+6036 5C               (        gmmut.asm):00036          incb
+6037 26F5             (        gmmut.asm):00037          bne count_loop
+                      (        gmmut.asm):00038         # report first byte of buffer
+6039 B66130           (        gmmut.asm):00039          lda buffer
+603C B76001           (        gmmut.asm):00040          sta output
+                      (        gmmut.asm):00041         # fix up overwritten bytes
+603F 5F               (        gmmut.asm):00042          clrb
+6040 8E6230           (        gmmut.asm):00043          ldx #buffer2
+6043                  (        gmmut.asm):00044         restore_loop
+6043 F7FFA0           (        gmmut.asm):00045          stb $ffa0
+6046 A680             (        gmmut.asm):00046          lda ,x+
+6048 B70000           (        gmmut.asm):00047          sta >$0
+604B 5C               (        gmmut.asm):00048          incb
+604C 26F5             (        gmmut.asm):00049          bne restore_loop
+604E 1700C7           (        gmmut.asm):00050          bsr restore_task_0
+6051 170092           (        gmmut.asm):00051          bsr turn_on_ints
+6054 39               (        gmmut.asm):00052          rts 
+                      (        gmmut.asm):00053         
+6055                  (        gmmut.asm):00054         vdg_wrap
+6055 170078           (        gmmut.asm):00055          bsr turn_off_ints
+6058 1700A5           (        gmmut.asm):00056          bsr save_task_0
+                      (        gmmut.asm):00057         # set SAM to highest base address ($FE00)
+                      (        gmmut.asm):00058         # for video
+605B B7FFC7           (        gmmut.asm):00059          sta $ffc7
+605E B7FFC9           (        gmmut.asm):00060          sta $ffc9
+6061 B7FFCB           (        gmmut.asm):00061          sta $ffcb
+6064 B7FFCD           (        gmmut.asm):00062          sta $ffcd
+6067 B7FFCF           (        gmmut.asm):00063          sta $ffcf
+606A B7FFD1           (        gmmut.asm):00064          sta $ffd1
+606D B7FFD3           (        gmmut.asm):00065          sta $ffd3
+6070                  (        gmmut.asm):00066         vdg_wait
+                      (        gmmut.asm):00067         # Set bank zero to first VDG page
+6070 8637             (        gmmut.asm):00068          lda #$3f-8
+6072 B7FFA0           (        gmmut.asm):00069          sta $ffa0
+                      (        gmmut.asm):00070         # Set bank one to page after 64k
+6075 8640             (        gmmut.asm):00071          lda #$3f+1
+6077 B7FFA1           (        gmmut.asm):00072          sta $ffa1
+                      (        gmmut.asm):00073         # save three bytes, and set
+                      (        gmmut.asm):00074         # their initial value
+607A B60000           (        gmmut.asm):00075          lda >$0
+607D B760CD           (        gmmut.asm):00076          sta saved_bytes+0
+6080 7F0000           (        gmmut.asm):00077          clr >$0
+6083 B62000           (        gmmut.asm):00078          lda $2000
+6086 B760CE           (        gmmut.asm):00079          sta saved_bytes+1
+6089 B6FE00           (        gmmut.asm):00080          lda $fe00
+608C B760CF           (        gmmut.asm):00081          sta saved_bytes+2
+608F 86FF             (        gmmut.asm):00082          lda #$ff
+6091 B72000           (        gmmut.asm):00083          sta $2000
+6094 B7FE00           (        gmmut.asm):00084          sta $fe00
+6097 8E0000           (        gmmut.asm):00085          ldx #0
+609A C60F             (        gmmut.asm):00086          ldb #15
+609C                  (        gmmut.asm):00087         vdg_loop
+609C 3001             (        gmmut.asm):00088          leax 1,x
+609E 26FC             (        gmmut.asm):00089          bne vdg_loop
+60A0 730000           (        gmmut.asm):00090          com >$0
+60A3 732000           (        gmmut.asm):00091          com $2000
+60A6 73FE00           (        gmmut.asm):00092          com $fe00
+60A9 5A               (        gmmut.asm):00093          decb
+60AA 26F0             (        gmmut.asm):00094          bne vdg_loop
+                      (        gmmut.asm):00095         
+                      (        gmmut.asm):00096         # restore memory values
+60AC B660CD           (        gmmut.asm):00097          lda saved_bytes+0
+60AF B70000           (        gmmut.asm):00098          sta >$0
+60B2 B660CE           (        gmmut.asm):00099          lda saved_bytes+1
+60B5 B72000           (        gmmut.asm):00100          sta $2000
+60B8 B660CF           (        gmmut.asm):00101          lda saved_bytes+2
+60BB B7FE00           (        gmmut.asm):00102          sta $fe00
+                      (        gmmut.asm):00103         
+                      (        gmmut.asm):00104         # restore mmu banks
+60BE 170057           (        gmmut.asm):00105          bsr restore_task_0
+60C1 170022           (        gmmut.asm):00106          bsr turn_on_ints
+                      (        gmmut.asm):00107         
+                      (        gmmut.asm):00108         # return
+60C4 39               (        gmmut.asm):00109          rts
+60C5                  (        gmmut.asm):00110         saved_task rmb 8
+60CD                  (        gmmut.asm):00111         saved_bytes rmb 3
+                      (        gmmut.asm):00112          
+                      (        gmmut.asm):00113         #
+                      (        gmmut.asm):00114         # subroutine
+                      (        gmmut.asm):00115         # turn off all interrupts
+                      (        gmmut.asm):00116         #
+60D0                  (        gmmut.asm):00117         turn_off_ints
+                      (        gmmut.asm):00118         # turn off pia0 ints
+60D0 4F               (        gmmut.asm):00119          clra
+60D1 B7FF01           (        gmmut.asm):00120          sta $ff01
+60D4 B7FF03           (        gmmut.asm):00121          sta $ff03
+                      (        gmmut.asm):00122         # turn off pia1 ints
+60D7 4F               (        gmmut.asm):00123          clra
+60D8 B7FF21           (        gmmut.asm):00124          sta $ff21
+60DB B7FF23           (        gmmut.asm):00125          sta $ff23
+                      (        gmmut.asm):00126         # turn off gime ints
+60DE 86CC             (        gmmut.asm):00127          lda #$cc
+60E0 84CF             (        gmmut.asm):00128          anda #%11001111
+60E2 B7FF90           (        gmmut.asm):00129          sta $ff90
+60E5 39               (        gmmut.asm):00130          rts
+                      (        gmmut.asm):00131         
+                      (        gmmut.asm):00132         #
+                      (        gmmut.asm):00133         # subroutine
+                      (        gmmut.asm):00134         # turn on all interrupts
+                      (        gmmut.asm):00135         #
+60E6                  (        gmmut.asm):00136         turn_on_ints
+                      (        gmmut.asm):00137         # turn on pia0 ints
+60E6 8634             (        gmmut.asm):00138          lda #$34
+60E8 B7FF01           (        gmmut.asm):00139          sta $ff01
+60EB 86B5             (        gmmut.asm):00140          lda #$b5
+60ED B7FF03           (        gmmut.asm):00141          sta $ff03
+                      (        gmmut.asm):00142         # turn on pia1 ints
+60F0 8634             (        gmmut.asm):00143          lda #$34
+60F2 B7FF21           (        gmmut.asm):00144          sta $ff21
+60F5 8637             (        gmmut.asm):00145          lda #$37
+60F7 B7FF23           (        gmmut.asm):00146          sta $ff23
+                      (        gmmut.asm):00147         # reset gime
+60FA 86CC             (        gmmut.asm):00148          lda #$cc
+60FC B7FF90           (        gmmut.asm):00149          sta $ff90
+60FF 39               (        gmmut.asm):00150          rts
+                      (        gmmut.asm):00151          
+6100                  (        gmmut.asm):00152         save_task_0
+                      (        gmmut.asm):00153         #
+                      (        gmmut.asm):00154         # subroutine
+                      (        gmmut.asm):00155         # save mmu regs at ffa0
+                      (        gmmut.asm):00156         #
+6100 108EFFA0         (        gmmut.asm):00157                 ldy #$ffa0
+6104 8E60C5           (        gmmut.asm):00158                 ldx #saved_task
+6107 ECA1             (        gmmut.asm):00159                 ldd ,y++
+6109 ED81             (        gmmut.asm):00160                 std ,x++
+610B ECA1             (        gmmut.asm):00161                 ldd ,y++
+610D ED81             (        gmmut.asm):00162                 std ,x++
+610F ECA1             (        gmmut.asm):00163                 ldd ,y++
+6111 ED81             (        gmmut.asm):00164                 std ,x++
+6113 ECA1             (        gmmut.asm):00165                 ldd ,y++
+6115 ED81             (        gmmut.asm):00166                 std ,x++
+6117 39               (        gmmut.asm):00167                 rts
+                      (        gmmut.asm):00168         
+6118                  (        gmmut.asm):00169         restore_task_0
+                      (        gmmut.asm):00170         #
+                      (        gmmut.asm):00171         # subroutine
+                      (        gmmut.asm):00172         # restore mmu regs at ffa0
+                      (        gmmut.asm):00173         #
+6118 108E60C5         (        gmmut.asm):00174                 ldy #saved_task
+611C 8EFFA0           (        gmmut.asm):00175                 ldx #$ffa0
+611F ECA1             (        gmmut.asm):00176                 ldd ,y++
+6121 ED81             (        gmmut.asm):00177                 std ,x++
+6123 ECA1             (        gmmut.asm):00178                 ldd ,y++
+6125 ED81             (        gmmut.asm):00179                 std ,x++
+6127 ECA1             (        gmmut.asm):00180                 ldd ,y++
+6129 ED81             (        gmmut.asm):00181                 std ,x++
+612B ECA1             (        gmmut.asm):00182                 ldd ,y++
+612D ED81             (        gmmut.asm):00183                 std ,x++
+612F 39               (        gmmut.asm):00184                 rts
+                      (        gmmut.asm):00185                 
+6130                  (        gmmut.asm):00186         buffer rmb 256
+6230                  (        gmmut.asm):00187         buffer2 rmb 256
+     6330             (        gmmut.asm):00188         max_program equ *
+                      (        gmmut.asm):00189          IFGT max_program-$7fff
+                      (        gmmut.asm):00190          ERROR "Program to large"
+                      (        gmmut.asm):00191          ENDC
+                      (        gmmut.asm):00192         
+                      (        gmmut.asm):00193          end start

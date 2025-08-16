@@ -1,16 +1,61 @@
  PRAGMA autobranchlength
  org $6000
 input rmb 1
+output rmb 1
 start
  lda input
+ cmpa #3
+ beq count_mmu_blocks
  cmpa #6
  beq vdg_wrap
- 
-vdg_wrap
- clr $71
+# nothing to do exit.
+ rts
+
+count_mmu_blocks
  bsr turn_off_ints
  bsr save_task_0
-# set VDG to highest base address
+# Put mmu block number
+# in first byte of each block
+ clrb
+ ldx #buffer2
+count_bocks_loop
+ stb $ffa0
+ lda >$0
+ sta ,x+
+ stb >$0
+ incb
+ bne count_bocks_loop
+# fill buffer with what is
+# left in the first byte of each block
+ clrb
+ ldx #buffer
+count_loop
+ stb $ffa0
+ lda >$0
+ sta ,x+
+ incb
+ bne count_loop
+# report first byte of buffer
+ lda buffer
+ sta output
+# fix up overwritten bytes
+ clrb
+ ldx #buffer2
+restore_loop
+ stb $ffa0
+ lda ,x+
+ sta >$0
+ incb
+ bne restore_loop
+ bsr restore_task_0
+ bsr turn_on_ints
+ rts 
+
+vdg_wrap
+ bsr turn_off_ints
+ bsr save_task_0
+# set SAM to highest base address ($FE00)
+# for video
  sta $ffc7
  sta $ffc9
  sta $ffcb
@@ -18,49 +63,53 @@ vdg_wrap
  sta $ffcf
  sta $ffd1
  sta $ffd3
- ldx #vdg_wait
- ldb #vdg_end-vdg_wait
- bsr move_to_constant_ram_and_execute
-# no return
- 
 vdg_wait
-# set mmu task 0 to all zeros
+# Set bank zero to first VDG page
  lda #$3f-8
  sta $ffa0
+# Set bank one to page after 64k
  lda #$3f+1
  sta $ffa1
- clr $0000
+# save three bytes, and set
+# their initial value
+ lda >$0
+ sta saved_bytes+0
+ clr >$0
+ lda $2000
+ sta saved_bytes+1
+ lda $fe00
+ sta saved_bytes+2
  lda #$ff
  sta $2000
  sta $fe00
- ldx #$0
+ ldx #0
+ ldb #15
 vdg_loop
  leax 1,x
  bne vdg_loop
- com $0000
+ com >$0
  com $2000
  com $fe00
- bra vdg_loop
-# reset 
- ldx $fffe
+ decb
+ bne vdg_loop
+
+# restore memory values
+ lda saved_bytes+0
+ sta >$0
+ lda saved_bytes+1
+ sta $2000
+ lda saved_bytes+2
+ sta $fe00
+
+# restore mmu banks
+ bsr restore_task_0
+ bsr turn_on_ints
+
+# return
+ rts
+saved_task rmb 8
+saved_bytes rmb 3
  
-# put roms in MMU 
- lda #$3c
- sta $ffa4
- lda #$3d
- sta $ffa5
- lda #$3e
- sta $ffa6
- lda #$3f
- sta $ffa7
-
-# set rom mode 
- sta $ffd4
- sta $ffde
-# cold/warm restart 
- tfr x,pc
-vdg_end
-
 #
 # subroutine
 # turn off all interrupts
@@ -80,7 +129,6 @@ turn_off_ints
  sta $ff90
  rts
 
-
 #
 # subroutine
 # turn on all interrupts
@@ -91,13 +139,12 @@ turn_on_ints
  sta $ff01
  lda #$b5
  sta $ff03
-
 # turn on pia1 ints
  lda #$34
  sta $ff21
  lda #$37
  sta $ff23
-# turn on gime ints
+# reset gime
  lda #$cc
  sta $ff90
  rts
@@ -119,21 +166,29 @@ save_task_0
 	std ,x++
 	rts
 
-move_to_constant_ram_and_execute
- ldu #code
-move_loop
- lda ,x+
- sta ,u+
- decb
- beq move_done
- bra move_loop
-move_done
- jmp code
-# no return
-
- org $fe00
-saved_task rmb 8
-code equ *
+restore_task_0
+#
+# subroutine
+# restore mmu regs at ffa0
+#
+	ldy #saved_task
+	ldx #$ffa0
+	ldd ,y++
+	std ,x++
+	ldd ,y++
+	std ,x++
+	ldd ,y++
+	std ,x++
+	ldd ,y++
+	std ,x++
+	rts
+	
+buffer rmb 256
+buffer2 rmb 256
+max_program equ *
+ IFGT max_program-$7fff
+ ERROR "Program to large"
+ ENDC
 
  end start
  
