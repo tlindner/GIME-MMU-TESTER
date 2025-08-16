@@ -154,35 +154,35 @@ save_task_0
 # subroutine
 # save mmu regs at ffa0
 #
-	ldy #$ffa0
-	ldx #saved_task
-	ldd ,y++
-	std ,x++
-	ldd ,y++
-	std ,x++
-	ldd ,y++
-	std ,x++
-	ldd ,y++
-	std ,x++
-	rts
+ ldy #$ffa0
+ ldx #saved_task
+ ldd ,y++
+ std ,x++
+ ldd ,y++
+ std ,x++
+ ldd ,y++
+ std ,x++
+ ldd ,y++
+ std ,x++
+ rts
 
 restore_task_0
 #
 # subroutine
 # restore mmu regs at ffa0
 #
-	ldy #saved_task
-	ldx #$ffa0
-	ldd ,y++
-	std ,x++
-	ldd ,y++
-	std ,x++
-	ldd ,y++
-	std ,x++
-	ldd ,y++
-	std ,x++
-	rts
-	
+ ldy #saved_task
+ ldx #$ffa0
+ ldd ,y++
+ std ,x++
+ ldd ,y++
+ std ,x++
+ ldd ,y++
+ std ,x++
+ ldd ,y++
+ std ,x++
+ rts
+ 
 buffer rmb 256
 buffer2 rmb 256
 max_program equ *

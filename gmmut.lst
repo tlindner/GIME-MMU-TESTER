@@ -154,35 +154,35 @@
                       (        gmmut.asm):00154         # subroutine
                       (        gmmut.asm):00155         # save mmu regs at ffa0
                       (        gmmut.asm):00156         #
-6100 108EFFA0         (        gmmut.asm):00157                 ldy #$ffa0
-6104 8E60C5           (        gmmut.asm):00158                 ldx #saved_task
-6107 ECA1             (        gmmut.asm):00159                 ldd ,y++
-6109 ED81             (        gmmut.asm):00160                 std ,x++
-610B ECA1             (        gmmut.asm):00161                 ldd ,y++
-610D ED81             (        gmmut.asm):00162                 std ,x++
-610F ECA1             (        gmmut.asm):00163                 ldd ,y++
-6111 ED81             (        gmmut.asm):00164                 std ,x++
-6113 ECA1             (        gmmut.asm):00165                 ldd ,y++
-6115 ED81             (        gmmut.asm):00166                 std ,x++
-6117 39               (        gmmut.asm):00167                 rts
+6100 108EFFA0         (        gmmut.asm):00157          ldy #$ffa0
+6104 8E60C5           (        gmmut.asm):00158          ldx #saved_task
+6107 ECA1             (        gmmut.asm):00159          ldd ,y++
+6109 ED81             (        gmmut.asm):00160          std ,x++
+610B ECA1             (        gmmut.asm):00161          ldd ,y++
+610D ED81             (        gmmut.asm):00162          std ,x++
+610F ECA1             (        gmmut.asm):00163          ldd ,y++
+6111 ED81             (        gmmut.asm):00164          std ,x++
+6113 ECA1             (        gmmut.asm):00165          ldd ,y++
+6115 ED81             (        gmmut.asm):00166          std ,x++
+6117 39               (        gmmut.asm):00167          rts
                       (        gmmut.asm):00168         
 6118                  (        gmmut.asm):00169         restore_task_0
                       (        gmmut.asm):00170         #
                       (        gmmut.asm):00171         # subroutine
                       (        gmmut.asm):00172         # restore mmu regs at ffa0
                       (        gmmut.asm):00173         #
-6118 108E60C5         (        gmmut.asm):00174                 ldy #saved_task
-611C 8EFFA0           (        gmmut.asm):00175                 ldx #$ffa0
-611F ECA1             (        gmmut.asm):00176                 ldd ,y++
-6121 ED81             (        gmmut.asm):00177                 std ,x++
-6123 ECA1             (        gmmut.asm):00178                 ldd ,y++
-6125 ED81             (        gmmut.asm):00179                 std ,x++
-6127 ECA1             (        gmmut.asm):00180                 ldd ,y++
-6129 ED81             (        gmmut.asm):00181                 std ,x++
-612B ECA1             (        gmmut.asm):00182                 ldd ,y++
-612D ED81             (        gmmut.asm):00183                 std ,x++
-612F 39               (        gmmut.asm):00184                 rts
-                      (        gmmut.asm):00185                 
+6118 108E60C5         (        gmmut.asm):00174          ldy #saved_task
+611C 8EFFA0           (        gmmut.asm):00175          ldx #$ffa0
+611F ECA1             (        gmmut.asm):00176          ldd ,y++
+6121 ED81             (        gmmut.asm):00177          std ,x++
+6123 ECA1             (        gmmut.asm):00178          ldd ,y++
+6125 ED81             (        gmmut.asm):00179          std ,x++
+6127 ECA1             (        gmmut.asm):00180          ldd ,y++
+6129 ED81             (        gmmut.asm):00181          std ,x++
+612B ECA1             (        gmmut.asm):00182          ldd ,y++
+612D ED81             (        gmmut.asm):00183          std ,x++
+612F 39               (        gmmut.asm):00184          rts
+                      (        gmmut.asm):00185          
 6130                  (        gmmut.asm):00186         buffer rmb 256
 6230                  (        gmmut.asm):00187         buffer2 rmb 256
      6330             (        gmmut.asm):00188         max_program equ *
