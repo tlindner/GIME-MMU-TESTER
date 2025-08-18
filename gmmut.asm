@@ -53,6 +53,21 @@ restore_loop
 
 vdg_wrap
  bsr turn_off_ints
+# Initialize CoCo Mem Jr.'s MMU
+ lda $ffa0
+ anda #%00111111
+ bne init_gime
+# Change to all ram mode
+ sta $ffdf
+# Initialize mmu banks
+ ldb #7
+ ldx #$ffa1
+mmu_init_loop
+ inca
+ sta ,x+
+ decb
+ bne mmu_init_loop
+init_gime
  lda #$cc
  sta $ff90
  
