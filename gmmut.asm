@@ -1,9 +1,17 @@
  PRAGMA autobranchlength
  org $6000
-input rmb 1
-output rmb 1
+in_param rmb 1
+out_param rmb 1
+gime rmb 1 # boolean; true if gime, false if jr
+text_block rmb 1 # mmu block of text screen
+text_address rmb 2 # address of text screen
+gime_0 rmb 1 shadow register
+gime_1 rmb 1 shadow register
+
 start
- lda input
+ lda in_param
+ cmpa #0
+ beq init_tests
  cmpa #3
  beq count_mmu_blocks
  cmpa #6
@@ -11,18 +19,61 @@ start
 # nothing to do exit.
  rts
 
+init_tests
+# flag gime
+ lda $ffa0
+ beq init_jr
+ 
+init_gime
+ lda #$ff
+ sta gime
+ lda #$38
+ sta text_block
+ ldd #$0400
+ std text_address
+# gime mmu blocks initialized by Color BASIC
+ bra init_done
+
+init_jr
+# flag Jr
+ lda #$0
+ sta gime
+# load default mmu
+ ldx #$ffa0
+ ldy #$ffa8
+ ldb #8
+init_jr_loop
+ sta ,x+
+ sta ,y+
+ decb
+ bne init_jr_loop
+ lda #$0
+ sta text_block
+ ldd #$0400
+ std text_address
+
+init_done
+# turn on mmu, task 0 (for both gime and jr)
+ lda #$cc
+ sta gime_0
+ sta $ff90
+ lda #$0
+ sta gime_1
+ sta $ff91
+ rts
+ 
 count_mmu_blocks
  bsr turn_off_ints
  bsr save_task_0
-# Put mmu block number
-# in first byte of each block
+# Put mmu block number in first byte of each block
+# and save value
  clrb
  ldx #buffer2
 count_bocks_loop
- stb $ffa0
- lda >$0
+ stb $ffa1
+ lda $2000
  sta ,x+
- stb >$0
+ stb $2000
  incb
  bne count_bocks_loop
 # fill buffer with what is
@@ -30,21 +81,21 @@ count_bocks_loop
  clrb
  ldx #buffer
 count_loop
- stb $ffa0
- lda >$0
+ stb $ffa1
+ lda $2000
  sta ,x+
  incb
  bne count_loop
 # report first byte of buffer
  lda buffer
- sta output
+ sta out_param
 # fix up overwritten bytes
  clrb
  ldx #buffer2
 restore_loop
- stb $ffa0
+ stb $ffa1
  lda ,x+
- sta >$0
+ sta $2000
  incb
  bne restore_loop
  bsr restore_task_0
@@ -53,33 +104,7 @@ restore_loop
 
 vdg_wrap
  bsr turn_off_ints
-# Initialize CoCo Mem Jr.'s MMU
- lda $ffa0
- anda #%00111111
- bne init_gime
-# Change to all ram mode
- sta $ffdf
-# Initialize mmu banks
- lda #0
- sta $ffa0
- inca
- sta $ffa1
- inca
- sta $ffa2
- inca
- sta $ffa3
- inca
- sta $ffa4
- inca
- sta $ffa5
- inca
- sta $ffa6
- inca
- sta $ffa7
-init_gime
- lda #$cc
- sta $ff90
- 
+
 # set SAM to highest base address ($FE00)
 # for video
  lda #%01111111
@@ -119,7 +144,7 @@ init_gime
  sta $ffa2
  bsr write_string
  fdb $4000
- fcn "Page: 07, Offset: 0000 "
+ fcn "Page: 08, Offset: 0000 "
 
 loop bra loop
 
@@ -277,19 +302,19 @@ set_done
 # turn off all interrupts
 #
 turn_off_ints
-#  orcc #$50
+ orcc #$50
 # turn off pia0 ints
- clra
- sta $ff01
- sta $ff03
-# turn off pia1 ints
- clra
- sta $ff21
- sta $ff23
-# turn off gime ints
- lda #$cc
- anda #%11001111
- sta $ff90
+#  clra
+#  sta $ff01
+#  sta $ff03
+# # turn off pia1 ints
+#  clra
+#  sta $ff21
+#  sta $ff23
+# # turn off gime ints
+#  lda gime_0
+#  anda #%11001111
+#  sta $ff90
  rts
 
 #
@@ -298,19 +323,20 @@ turn_off_ints
 #
 turn_on_ints
 # turn on pia0 ints
- lda #$34
- sta $ff01
- lda #$b5
- sta $ff03
-# turn on pia1 ints
- lda #$34
- sta $ff21
- lda #$37
- sta $ff23
-# reset gime
- lda #$cc
- sta $ff90
-#  andcc #$af
+#  lda #$34
+#  sta $ff01
+#  lda #$b5
+#  sta $ff03
+# # turn on pia1 ints
+#  lda #$34
+#  sta $ff21
+#  lda #$37
+#  sta $ff23
+# # turn off gime ints
+#  lda gime_0
+#  anda #%11001111
+#  sta $ff90
+ andcc #$af
  rts
  
 restore_task_0
@@ -440,8 +466,7 @@ bitmap_font
  fcb $89,$23,$ff,$ff,$ff,$ff,$ff,$ff (~)
  fcb $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff ( )
  
-max_program equ *
- IFGT max_program-$7fff
+ IFGT *-$7fff
  ERROR "Program to large"
  ENDC
 
