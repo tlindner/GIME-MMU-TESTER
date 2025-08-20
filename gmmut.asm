@@ -45,6 +45,7 @@ init_jr
 init_jr_loop
  sta ,x+
  sta ,y+
+ inca
  decb
  bne init_jr_loop
  lda #$0
