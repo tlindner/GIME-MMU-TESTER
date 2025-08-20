@@ -51,6 +51,15 @@ init_jr_loop
  sta text_block
  ldd #$0400
  std text_address
+# all ram mode
+ ldx #$8000
+ram_loop
+ sta $ffde
+ lda ,x
+ sta $ffdf
+ sta ,x+
+ cmpx #$0000
+ bne ram_loop
 
 init_done
 # turn on mmu, task 0 (for both gime and jr)
@@ -104,12 +113,13 @@ restore_loop
 
 vdg_wrap
  bsr turn_off_ints
+ sta $ffdf # all ram mode
 
 # set SAM to highest base address ($FE00)
 # for video
  lda #%01111111
  bsr store_a_into_sam_offset
- 
+
  lda #$3f
  sta $ffa2
  bsr write_string
