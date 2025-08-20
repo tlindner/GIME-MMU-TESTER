@@ -58,7 +58,7 @@ ram_loop
  lda ,x
  sta $ffdf
  sta ,x+
- cmpx #$0000
+ cmpx #$feff
  bne ram_loop
 
 init_done
