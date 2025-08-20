@@ -58,7 +58,7 @@
 605E A684             (        gmmut.asm):00058          lda ,x
 6060 B7FFDF           (        gmmut.asm):00059          sta $ffdf
 6063 A780             (        gmmut.asm):00060          sta ,x+
-6065 8CFEFF           (        gmmut.asm):00061          cmpx #$feff
+6065 8CFF00           (        gmmut.asm):00061          cmpx #$ff00
 6068 26F1             (        gmmut.asm):00062          bne ram_loop
                       (        gmmut.asm):00063         
 606A                  (        gmmut.asm):00064         init_done
