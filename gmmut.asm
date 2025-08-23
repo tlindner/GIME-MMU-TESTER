@@ -1,24 +1,16 @@
  PRAGMA autobranchlength
+ PRAGMA cescapes
  org $6000
 in_param rmb 1
 out_param rmb 1
 gime rmb 1 # boolean; true if gime, false if jr
 text_block rmb 1 # mmu block of text screen
 text_address rmb 2 # address of text screen
+text_position fdb 0
 gime_0 rmb 1 shadow register
 gime_1 rmb 1 shadow register
 
 start
- lda in_param
- cmpa #0
- beq init_tests
- cmpa #3
- beq count_mmu_blocks
- cmpa #6
- beq vdg_wrap
-# nothing to do exit.
- rts
-
 init_tests
 # flag gime
  lda $ffa0
@@ -63,6 +55,7 @@ ram_loop
  bne ram_loop
 
 init_done
+ bsr turn_off_ints
 # turn on mmu, task 0 (for both gime and jr)
  lda #$cc
  sta gime_0
@@ -70,10 +63,50 @@ init_done
  lda #$0
  sta gime_1
  sta $ff91
- rts
- 
+
+main_menu
+ bsr clear_screen
+ bsr strout
+ fcc "GIME MMU TESTER\r"
+ fcc "2MB AWARE\r"
+ fcc "1) MMU READ BACK 6 BITS?\r"
+ fcc "2) MMU READ BACK 8 BITS?\r"
+ fcc "3) COUNT AVAILABLE BANKS\r"
+ fcc "4) TEST CONSTANT RAM, TASK 0\r"
+ fcc "5) TEST CONSTANT RAM, TASK 1\r"
+ fcn "6) SHOW VDG WRAP AROUND\r"
+init_loop
+ ldx #text_address
+ ldd text_position
+ leax d,x
+ com ,x
+ bsr keyin
+ cmpa #0
+ beq init_loop
+ pshs a
+ bsr chrout
+ lda #$0d
+ bsr chrout
+ lda ,s
+ cmpa #'3
+ beq count_mmu_blocks
+ cmpa #'6
+ beq vdg_wrap
+ bra done_after
+return_from_test
+ puls a
+ cmpa #'3
+ beq report_count_mmu
+done_after
+ bsr strout
+ fcn "PRESS ANY KEY TO CONTINUE\r"
+da_wait
+ bsr keyin
+ cmpa #0
+ beq da_wait
+ jmp main_menu
+
 count_mmu_blocks
- bsr turn_off_ints
  bsr save_task_0
 # Put mmu block number in first byte of each block
 # and save value
@@ -109,11 +142,47 @@ restore_loop
  incb
  bne restore_loop
  bsr restore_task_0
- bsr turn_on_ints
- rts 
+ jmp return_from_test 
 
+report_count_mmu
+ lda out_param
+ cmpa #$f0
+ beq rc_128k
+ cmpa #$e0
+ beq rc_256k
+ cmpa #$c0
+ beq rc_512k
+ cmpa #$80
+ beq rc_1024k
+ cmpa #$00
+ beq rc_2048k
+ bsr strout
+ fcn "UNKNOWN RAM AMOUNT\r"
+ bra done_after
+rc_128k
+ bsr strout
+ fcn "128K - $30 TO $3F\r"
+ bra done_after
+rc_256k
+ bsr strout
+ fcn "256K - $20 TO $3F\r"
+ bra done_after
+rc_512k
+ bsr strout
+ fcn "512K - $00 TO $3F\r"
+ bra done_after
+rc_1024k
+ bsr strout
+ fcn "1024K - $00 TO $7F\r"
+ bra done_after
+rc_2048k
+ bsr strout
+ fcn "2048K - $00 TO $FF\r"
+ bra done_after
+
+
+ 
 vdg_wrap
- bsr turn_off_ints
  sta $ffdf # all ram mode
 
 # set SAM to highest base address ($FE00)
@@ -157,7 +226,7 @@ vdg_wrap
  fdb $4000
  fcn "Page: 08, Offset: 0000 "
 
-loop bra loop
+loop1 bra loop1
 
  clra
  pshs a
@@ -279,7 +348,6 @@ vdg_loop
 
 # restore mmu banks
  bsr restore_task_0
- bsr turn_on_ints
 
 # return
  rts
@@ -376,6 +444,222 @@ copy_task
  ldd ,y++
  std ,x++
  rts
+
+clear_screen
+#
+# subroutine
+# clear the text screen
+#
+ ldx #$0400
+ ldd #$6060
+cs_loop
+ std ,x++
+ cmpx #$600
+ bne cs_loop
+ clr text_position
+ clr text_position+1
+ rts
+ 
+strout
+#
+# subroutine
+# Output string to screen
+#
+ puls u
+so_loop
+ lda ,u+
+ beq so_done
+ jsr chrout
+ bra so_loop
+so_done
+ tfr u,pc
+ 
+chrout
+#
+# subroutine
+# output to text screen
+#
+ cmpa #$0d
+ beq co_carrage_return
+ cmpa #$60
+ bge co_sub60
+ cmpa #$40
+ bge co_out
+co_add40
+ adda #$40
+ bra co_out
+co_sub60
+ suba #$60
+co_out
+ pshs a
+ ldx text_address
+ ldd text_position
+ leax d,x
+ addd #1
+ std text_position
+ puls a
+ sta ,x
+ ldd text_position
+ bra co_check_scroll
+co_carrage_return
+ ldd text_position
+ addd #32
+ andb #%11100000
+ std text_position
+co_check_scroll
+ cmpd #512
+ beq co_scroll
+ rts
+co_scroll
+ ldx text_address
+co_scroll_loop
+ ldd 32,x
+ std ,x++
+ cmpx #$0600-32
+ bne co_scroll_loop
+ ldd #$6060
+co_clear_last_line_loop
+ std ,x++
+ cmpx #$0600
+ bne co_clear_last_line_loop
+ ldd text_position
+ subd #32
+ std text_position
+ rts
+
+pia0 equ $ff00
+keybuf rmb 8 keyboard memory buffer
+casflg rmb 1 upper case/lower case flag: $ff=upper, 0=lower
+debval fdb $45e keyboard debounce delay (set to $45e)
+
+la1c1 clr pia0+2 clear column strobe
+ lda pia0 read key rows
+ coma complement row data
+ asla shift off joystick data
+ beq la244 return if no keys or fire buttons down
+#
+# subroutine
+# this routine gets a keystroke from the keyboard if a key
+# is down. it returns zero true if there was no key down.
+#
+keyin pshs u,x,b save registers
+ ldu #pia0 point u to pia0
+ ldx #keybuf point x to keyboard memory buffer
+ clra * clear carry flag, set column counter (acca)
+ deca * to $ff
+ pshs x,a save column ctr & 2 blank (x reg) on stack
+ sta 2,u initialize column strobe to $ff
+la1d9 rol 2,u * rotate column strobe data left 1 bit, carry
+ bcc la220 * into bit 0 - branch if 8 shifts done
+ inc ,s increment column counter
+ bsr la23a read keyboard row data
+ sta 1,s temp store key data
+ eora ,x set any bit where a key has moved
+ anda ,x acca=0 if no new key down, <70 if key was released
+ ldb 1,s get new key data
+ stb ,x+ store it in key memory
+ tsta was a new key down?
+ beq la1d9 no-check another column
+ ldb 2,u * get column strobe data and
+ stb 2,s * temp store it on the stack
+* this routine converts the key depression into a number
+* from 0-50 in accb corresponding to the key that was down
+ ldb #$f8 to make sure accb=0 after first addb #8
+la1f4 addb #$08 add 8 for each row of keyboard
+ lsra acca has the row number of this key - add 8 for each row
+ bcc la1f4 go on until a zero appears in the carry flag
+ addb ,s add in the column number
+* now convert the value in accb into ascii
+ beq la245
+ cmpb #26 the ‘at sign’ key was down was it a letter?
+ bhi la247 no
+ orb #$40 yes, convert to upper case ascii
+ bsr la22e check for the shift key
+ ora casflg * ‘or’ in the case flag & branch if in upper
+ bne la20c * case mode or shift key down
+ orb #$20 convert to lower case
+la20c stb ,s temp store ascii value
+ ldx debval get keyboard debounce
+ bsr la1ae
+ ldb #$ff set column strobe to all ones (no
+ bsr la238 strobe) and read keyboard
+ inca = incr row data, acca now 0 if no joystick
+ bne la220 = button down. branch if joystick button down
+la21a ldb 2,s get column strobe data
+ bsr la238 read a key
+ cmpa 1,s is it the same key as before debounce?
+la220 puls a,x remove temp slots from the stack and recover
+* the ascii value of the key
+ bne la22b not the same key or joystick button
+ cmpa #$12 is shift zero down?
+ bne la22c no
+ com casflg yes, toggle upper case/lower case flag
+la22b clra set zero flag to indicate no new key down
+la22c puls b,x,u,pc restore registers
+
+* test for the shift key
+la22e lda #$7f column strobe
+ sta 2,u store to pla
+ lda ,u read key data
+ coma *
+ anda #$40 * set bit 6 if shift key down
+ rts return
+
+* read the keyboard
+la238 stb 2,u save new column strobe value
+la23a lda ,u read pia0, port a to see if key is down
+* a bit will be zero if one is
+ ora #$80 mask off the joystick comparator input
+ tst $02,u are we strobing column 7?
+ bmi la244 no
+ ora #$c0 yes, force row 6 to be high - this will cause
+* the shift key to be ignored
+la244 rts return
+
+la245 ldb #51 code for ‘at sign’
+la247 ldx #contab-$36 point x to control code table
+ cmpb #33 key number <33?
+ blo la264 yes (arrow keys, space bar, zero)
+ ldx #contab-$54 point x to middle of control table
+ cmpb #48 key number >48?
+ bhs la264 yes (enter,clear,break,at sign)
+ bsr la22e check shift key (acca will contain status)
+ cmpb #43 is key a number, colon or semicolon?
+ bls la25d yes
+ eora #$40 toggle bit 6 of acca which contains the shift data
+* only for slash,hyphen,period,comma
+la25d tsta shift key down?
+ bne la20c yes
+ addb #$10 no, add in ascii offset correction
+ bra la20c go check for debounce
+la264 aslb mult accb by 2 - there are 2 entries in control
+* table for each key - one shifted, one not
+ bsr la22e check shift key
+ beq la26a not down
+ incb add one to get the shifted value
+la26a ldb b,x get ascii code from control table
+ bra la20c go check debounce
+la1ae jmp la7d3 delay while x decrements to zero
+* delay while decrementing x to zero
+la7d3 leax -1,x decrement x
+ bne la7d3 branch if not zero
+ rts
+*
+*
+* control table unshifted, shifted values
+contab fcb $5e,$5f up arrow
+ fcb $0a,$5b down arrow
+ fcb $08,$15 right arrow
+ fcb $09,$5d left arrow
+ fcb $20,$20 space bar
+ fcb $30,$12 zero
+ fcb $0d,$0d enter
+ fcb $0c,$5c clear
+ fcb $03,$03 break
+ fcb $40,$13 at sign
+
+
+
 
 buffer rmb 256
 buffer2 rmb 256
