@@ -3,7 +3,7 @@
  org $6000
 in_param rmb 1
 out_param rmb 1
-gime rmb 1 # boolean; true if gime, false if jr
+gime_flag rmb 1 # boolean; true if gime, false if jr
 text_block rmb 1 # mmu block of text screen
 text_address rmb 2 # address of text screen
 text_position fdb 0
@@ -12,24 +12,44 @@ gime_1 rmb 1 shadow register
 
 start
 init_tests
-# flag gime
+# Test for coco3
+# CoCo 3 will have $38, Jr. will have $00
+# Mooh is currently unknown
  lda $ffa0
+ anda #%00111111
+ cmpa #$38
+ beq init_gime
+ cmpa #$0
  beq init_jr
+# unknown MMU
+ ldx #unknown_message
+error_loop
+ lda ,x+
+ beq error_done
+ jsr [$a002] ; Color BASIC ROM CHROUT
+ bra error_loop
+error_done
+ rts ; Go Back to BASIC
+unknown_message
+ fcn "\rUNKNOWN MMU.\r"
+
+start_loop
+ bra start_loop
  
 init_gime
  lda #$ff
- sta gime
+ sta gime_flag
  lda #$38
  sta text_block
  ldd #$0400
  std text_address
 # gime mmu blocks initialized by Color BASIC
- bra init_done
+ bra init_common
 
 init_jr
 # flag Jr
  lda #$0
- sta gime
+ sta gime_flag
 # load default mmu
  ldx #$ffa0
  ldy #$ffa8
@@ -40,24 +60,25 @@ init_jr_loop
  inca
  decb
  bne init_jr_loop
+# initialize internal variables
  lda #$0
  sta text_block
  ldd #$0400
  std text_address
-# all ram mode
+# change to all ram mode
  ldx #$8000
 ram_loop
  sta $ffde
- lda ,x
+ ldd ,x
  sta $ffdf
- sta ,x+
+ std ,x++
  cmpx #$ff00
  bne ram_loop
 
-init_done
+init_common
  bsr turn_off_ints
-# turn on mmu, task 0 (for both gime and jr)
- lda #$cc
+# turn on mmu, task 0, no const ram (for both gime and jr)
+ lda #$c4
  sta gime_0
  sta $ff90
  lda #$0
@@ -69,17 +90,22 @@ main_menu
  bsr strout
  fcc "GIME MMU TESTER\r"
  fcc "2MB AWARE\r"
- fcc "1) MMU READ BACK 6 BITS?\r"
- fcc "2) MMU READ BACK 8 BITS?\r"
+ fcc "-) MMU READ BACK 6 BITS?\r"
+ fcc "-) MMU READ BACK 8 BITS?\r"
  fcc "3) COUNT AVAILABLE BANKS\r"
- fcc "4) TEST CONSTANT RAM, TASK 0\r"
- fcc "5) TEST CONSTANT RAM, TASK 1\r"
+ fcc "-) TEST CONSTANT RAM, TASK 0\r"
+ fcc "-) TEST CONSTANT RAM, TASK 1\r"
  fcn "6) SHOW VDG WRAP AROUND\r"
 init_loop
- ldx #text_address
+ decb
+ bne mm_skip
+ pshs b
+ ldx text_address
  ldd text_position
  leax d,x
  com ,x
+ puls b
+mm_skip
  bsr keyin
  cmpa #0
  beq init_loop
@@ -87,25 +113,50 @@ init_loop
  bsr chrout
  lda #$0d
  bsr chrout
- lda ,s
- cmpa #'3
- beq count_mmu_blocks
- cmpa #'6
- beq vdg_wrap
- bra done_after
-return_from_test
- puls a
- cmpa #'3
- beq report_count_mmu
+ ldb ,s
+ subb #'1
+ cmpb #7
+ bgt mm_done
+ lslb
+ ldx #jump_table
+ jsr [b,x]
 done_after
+ ldb ,s
+ subb #'1
+ cmpb #7
+ bgt mm_done
+ lslb
+ ldx #post_jump_table
+ jsr [b,x]
  bsr strout
  fcn "PRESS ANY KEY TO CONTINUE\r"
-da_wait
+mm_wait
  bsr keyin
  cmpa #0
- beq da_wait
+ beq mm_wait
+mm_done
+ puls b
  jmp main_menu
 
+jump_table
+ fdb return
+ fdb return
+ fdb count_mmu_blocks
+ fdb return
+ fdb return
+ fdb vdg_wrap
+
+post_jump_table
+ fdb return
+ fdb return
+ fdb report_count_mmu
+ fdb return
+ fdb return
+ fdb return
+
+return
+ rts
+	
 count_mmu_blocks
  bsr save_task_0
 # Put mmu block number in first byte of each block
@@ -142,7 +193,7 @@ restore_loop
  incb
  bne restore_loop
  bsr restore_task_0
- jmp return_from_test 
+ rts 
 
 report_count_mmu
  lda out_param
@@ -158,128 +209,107 @@ report_count_mmu
  beq rc_2048k
  bsr strout
  fcn "UNKNOWN RAM AMOUNT\r"
- bra done_after
+ rts
 rc_128k
  bsr strout
  fcn "128K - $30 TO $3F\r"
- bra done_after
+ rts
 rc_256k
  bsr strout
  fcn "256K - $20 TO $3F\r"
- bra done_after
+ rts
 rc_512k
  bsr strout
  fcn "512K - $00 TO $3F\r"
- bra done_after
+ rts
 rc_1024k
  bsr strout
  fcn "1024K - $00 TO $7F\r"
- bra done_after
+ rts
 rc_2048k
  bsr strout
  fcn "2048K - $00 TO $FF\r"
- bra done_after
+ rts
 
-
- 
 vdg_wrap
- sta $ffdf # all ram mode
+ bsr save_task_0
+# explain what is going to happen
+ bsr strout
+ fcc "\rTHE NEXT SCREEN WILL BE A PMODE 4 "
+ fcc "GRAPHICS SCREEN WITH THE START ADDRESS "
+ fcc "SET TO $FE00.\r"
+ fcc "THE WRAP AROUND MMU PAGE WILL BE IDENTIFIED."
+ fcn "\rPRESS ANY KEY TO CONTINUE\r\r"
 
+vw_wait
+ bsr keyin
+ cmpa #0
+ beq vw_wait
+
+# Set Sam to PMODE 4
+ lda #%11110000
+ sta $ffc5
+ sta $ffc3
+ sta $ffc0
+ sta $ff22
 # set SAM to highest base address ($FE00)
 # for video
  lda #%01111111
  bsr store_a_into_sam_offset
 
  lda #$3f
- sta $ffa2
+ sta $ffa1
  bsr write_string
- fdb $4000
+ fdb $2000
  fcn "Page: 3f, Offset: 0000 "
  bsr write_string
- fdb $5e00
+ fdb $3e00
  fcn "Page: 3f, Offset: 1e00 "
  
  lda #$7
- sta $ffa2
+ sta $ffa1
  bsr write_string
- fdb $4000
+ fdb $2000
  fcn "Page: 07, Offset: 0000 "
  bsr write_string
- fdb $5e00
+ fdb $4e00
  fcn "Page: 07, Offset: 1e00 "
 
  lda #$00
- sta $ffa2
+ sta $ffa1
  bsr write_string
- fdb $4000
+ fdb $2000
  fcn "Page: 00, Offset: 0000 "
  
  lda #$40
- sta $ffa2
+ sta $ffa1
  bsr write_string
- fdb $4000
+ fdb $2000
  fcn "Page: 40, Offset: 0000 "
 
  lda #$8
- sta $ffa2
+ sta $ffa1
  bsr write_string
- fdb $4000
+ fdb $2000
  fcn "Page: 08, Offset: 0000 "
 
-loop1 bra loop1
+dp_wait
+ bsr keyin
+ cmpa #0
+ beq dp_wait
 
- clra
- pshs a
-loop_a
- lda ,s
- tfr a,b
- andb #%00111111
- cmpb #$3b
- beq skip
- sta $ffa0
- ldx #hex
- lsra
- lsra
- lsra
- lsra
- lda a,x
- sta string+6
- sta string1+6
- lda ,s
- anda #%00001111 
- lda a,x
- sta string+7
- sta string1+7
-
- bsr write_string
- fdb $0000
-string
- fcn "Page: XX, Offset: 0000 "
- 
- bsr write_string
- fdb $1000
-string1
- fcn "Page: XX, Offset: 1000 "
- 
-skip
- inc ,s
- bne loop_a
-
-# show all pages
- clr ,s
-loop_show_pages
- lda ,s
+ bsr restore_task_0
+# Set Sam to text mode
+ lda #$00
+ sta $ffc0
+ sta $ffc2
+ sta $ffc4
+ sta $ff22
+# set SAM to text screen base address ($0400)
+# for video
+ lda #%00000010
  bsr store_a_into_sam_offset
- ldx #0
-delay_loop
- leax 1,x
- bne delay_loop
- inc ,s
- bra loop_show_pages
- 
-wait jmp wait
-
-hex fcc "0123456789abcdef"
+ rts
 
 write_string
  puls u
@@ -308,52 +338,6 @@ write_character_loop
  bne write_character_loop
  rts
 
-vdg_wait
-# Set bank zero to first VDG page
- lda #$3f-8
- sta $ffa0
-# Set bank one to page after 64k
- lda #$3f+1
- sta $ffa1
-# save three bytes, and set
-# their initial value
- lda >$0
- sta saved_bytes+0
- clr >$0
- lda $2000
- sta saved_bytes+1
- lda $fe00
- sta saved_bytes+2
- lda #$ff
- sta $2000
- sta $fe00
- ldx #0
- ldb #15
-vdg_loop
- leax 1,x
- bne vdg_loop
- com >$0
- com $2000
- com $fe00
- decb
- bne vdg_loop
-
-# restore memory values
- lda saved_bytes+0
- sta >$0
- lda saved_bytes+1
- sta $2000
- lda saved_bytes+2
- sta $fe00
-
-# restore mmu banks
- bsr restore_task_0
-
-# return
- rts
-saved_task rmb 8
-saved_bytes rmb 3
- 
 #
 # subroutine
 # Store reg a into sam video offset register
@@ -361,9 +345,8 @@ saved_bytes rmb 3
 store_a_into_sam_offset
  ldb #7
  ldx #$ffc6
- rola
 loop_store_a
- rola
+ rora
  bcc set_clear
 set_set
  leax 1,x
@@ -382,18 +365,6 @@ set_done
 #
 turn_off_ints
  orcc #$50
-# turn off pia0 ints
-#  clra
-#  sta $ff01
-#  sta $ff03
-# # turn off pia1 ints
-#  clra
-#  sta $ff21
-#  sta $ff23
-# # turn off gime ints
-#  lda gime_0
-#  anda #%11001111
-#  sta $ff90
  rts
 
 #
@@ -401,22 +372,10 @@ turn_off_ints
 # turn on all interrupts
 #
 turn_on_ints
-# turn on pia0 ints
-#  lda #$34
-#  sta $ff01
-#  lda #$b5
-#  sta $ff03
-# # turn on pia1 ints
-#  lda #$34
-#  sta $ff21
-#  lda #$37
-#  sta $ff23
-# # turn off gime ints
-#  lda gime_0
-#  anda #%11001111
-#  sta $ff90
  andcc #$af
  rts
+ 
+saved_task rmb 8
  
 restore_task_0
 #
@@ -530,13 +489,12 @@ co_clear_last_line_loop
 pia0 equ $ff00
 keybuf rmb 8 keyboard memory buffer
 casflg rmb 1 upper case/lower case flag: $ff=upper, 0=lower
-debval fdb $45e keyboard debounce delay (set to $45e)
 
-la1c1 clr pia0+2 clear column strobe
- lda pia0 read key rows
- coma complement row data
- asla shift off joystick data
- beq la244 return if no keys or fire buttons down
+# la1c1 clr pia0+2 clear column strobe
+#  lda pia0 read key rows
+#  coma complement row data
+#  asla shift off joystick data
+#  beq la244 return if no keys or fire buttons down
 #
 # subroutine
 # this routine gets a keystroke from the keyboard if a key
@@ -579,7 +537,7 @@ la1f4 addb #$08 add 8 for each row of keyboard
  bne la20c * case mode or shift key down
  orb #$20 convert to lower case
 la20c stb ,s temp store ascii value
- ldx debval get keyboard debounce
+ ldx #$45e get keyboard debounce
  bsr la1ae
  ldb #$ff set column strobe to all ones (no
  bsr la238 strobe) and read keyboard
