@@ -331,7 +331,7 @@
      2C204F6666736574
      3A20303030302000
 63E7 17009E           (        gmmut.asm):00274          bsr write_string
-63EA 4E00             (        gmmut.asm):00275          fdb $4e00
+63EA 3E00             (        gmmut.asm):00275          fdb $3e00
 63EC 506167653A203037 (        gmmut.asm):00276          fcn "Page: 07, Offset: 1e00 "
      2C204F6666736574
      3A20316530302000
