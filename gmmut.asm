@@ -1,12 +1,11 @@
  PRAGMA autobranchlength
  PRAGMA cescapes
  org $6000
-in_param rmb 1
 out_param rmb 1
 gime_flag rmb 1 # boolean; true if gime, false if jr
 text_block rmb 1 # mmu block of text screen
 text_address rmb 2 # address of text screen
-text_position fdb 0
+text_position rmb 2 # cursor offset
 gime_0 rmb 1 shadow register
 gime_1 rmb 1 shadow register
 
@@ -90,12 +89,12 @@ main_menu
  bsr strout
  fcc "GIME MMU TESTER\r"
  fcc "2MB AWARE\r"
- fcc "-) MMU READ BACK 6 BITS?\r"
- fcc "-) MMU READ BACK 8 BITS?\r"
- fcc "3) COUNT AVAILABLE BANKS\r"
- fcc "-) TEST CONSTANT RAM, TASK 0\r"
- fcc "-) TEST CONSTANT RAM, TASK 1\r"
- fcn "6) SHOW VDG WRAP AROUND\r"
+ fcc "1) COUNT AVAILABLE MMU BANKS\r"
+ fcc "-) MMU BLOCK REGISTER WIDTH\r"
+ fcc "-) TEST TASK SWITCHING\r"
+ fcc "-) TEST CONSTANT RAM\r"
+ fcc "5) SHOW VDG WRAP AROUND\r"
+ fcn "6) FAST TIMER TEST\r"
 init_loop
  decb
  bne mm_skip
@@ -139,17 +138,17 @@ mm_done
  jmp main_menu
 
 jump_table
- fdb return
- fdb return
  fdb count_mmu_blocks
  fdb return
  fdb return
+ fdb return
  fdb vdg_wrap
+ fdb timer_test
 
 post_jump_table
- fdb return
- fdb return
  fdb report_count_mmu
+ fdb return
+ fdb return
  fdb return
  fdb return
  fdb return
@@ -344,6 +343,139 @@ write_character_loop
  bne write_character_loop
  rts
 
+timer_test
+# turn off all pia interrupts
+ lda $ff01
+ anda #%00111110
+ sta $ff01
+ lda $ff00
+ 
+ lda $ff03
+ anda #%00111110
+ sta $ff03
+ lda $ff02
+ 
+# install both isr
+ lda #$7e # JMP instruction extended
+ sta $fef4
+ sta $fef7
+ ldd #tt_isr_firq
+ std $fef5
+ ldd #tt_isr_irq
+ std $fef8
+
+# setup timer
+ lda #0 # lsb of timer
+ sta $ff95
+ lda #0 # msb of timer
+ sta $ff94
+ lda #%00100000 # firq for timer
+ sta $ff93
+ lda #%00001000 # irq for vertical border
+ sta $ff92
+ lda $ff92
+ lda $ff93
+
+# set timer source
+ lda gime_1
+ ora #%00000000 # slow - 15khz
+ sta gime_1
+ sta $ff91
+ 
+# turn on gime interrupts
+ lda gime_0
+ ora #%00110000
+ sta gime_0
+ sta $ff90
+
+ bsr clear_screen
+ ldd #$e6e6
+ ldx #$400+31
+checker_loop
+ std ,x
+ leax 32,x
+ cmpx #$400+31+(32*16)
+ bne checker_loop
+ 
+ ldx #hex
+
+# turn on cpu interrupts
+ andcc #$af
+
+tt_loop
+ ldy #$400
+ ldd timer_value
+ anda #$0f
+ lda a,x
+ sta ,y+
+ tfr b,a
+ lsra
+ lsra
+ lsra
+ lsra
+ lda a,x
+ sta ,y+
+ tfr b,a
+ anda #$0f
+ lda a,x
+ sta ,y++
+ 
+ bsr keyin
+ cmpa #'S
+ beq tt_inc10
+ cmpa #'A
+ beq tt_dec10
+ cmpa #'X
+ beq tt_inc1
+ cmpa #'Z
+ beq tt_dec1
+ bra tt_loop
+tt_inc10
+ ldd timer_value
+ addd #10
+ std timer_value
+ bra tt_loop
+tt_dec10
+ ldd timer_value
+ subd #10
+ std timer_value
+ bra tt_loop
+tt_inc1
+ ldd timer_value
+ addd #1
+ std timer_value
+ bra tt_loop
+tt_dec1
+ ldd timer_value
+ subd #1
+ std timer_value
+ bra tt_loop
+
+hex fcb 48,49,50,51,52,53,54,54,56,57,1,2,3,4,5,6
+
+tt_isr_firq
+ pshs a
+ lda #0 
+ sta $ffbd
+ sta $ff95 # zero timer count down
+ sta $ff94
+ lda $ff93
+ puls a
+#  inc $401
+ rti
+
+timer_value fdb $0080
+tt_isr_irq
+ lda #$ff
+ sta $ffbd
+ ldd timer_value # reset timer count down
+ stb $ff95
+ sta $ff94
+#  inc $402
+ lda $ff92 # clear the irq interrupt
+ lda $ff93 # Also clear the firq interrupt
+ rti
+ 
 #
 # subroutine
 # Store reg a into sam video offset register
