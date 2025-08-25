@@ -26,7 +26,7 @@ Option 6:
  - Page 7, offset 0
  - Page 40, offset 0
  - Page 8, offset 0
-5. You will see two page listed, the FE00 pages and the wrap around page.
+5. You will see two pages listed, the FE00 page at the top and the wrap around page next.
 6. A GIME in a CoCo 3 will wrap from page 3f to 0.
 7. Currently, Mame will wrap from 3f, to 40.
 
