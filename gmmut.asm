@@ -272,7 +272,7 @@ vw_wait
  fdb $2000
  fcn "Page: 07, Offset: 0000 "
  bsr write_string
- fdb $4e00
+ fdb $3e00
  fcn "Page: 07, Offset: 1e00 "
 
  lda #$00
