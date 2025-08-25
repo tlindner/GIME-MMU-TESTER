@@ -49,6 +49,7 @@ init_jr
 # flag Jr
  lda #$0
  sta gime_flag
+ lda #$38			# lowest banks start at $38
 # load default mmu
  ldx #$ffa0
  ldy #$ffa8
@@ -66,6 +67,7 @@ init_jr_loop
  std text_address
 # change to all ram mode
  ldx #$8000
+ bsr turn_off_ints   # need to turn off interrupts before swapping in RAM
 ram_loop
  sta $ffde
  ldd ,x
