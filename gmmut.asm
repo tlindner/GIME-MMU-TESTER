@@ -32,24 +32,23 @@ error_done
 unknown_message
  fcn "\rUNKNOWN MMU.\r"
 
-start_loop
- bra start_loop
- 
 init_gime
+ clr $71 # force cold start on reset
  lda #$ff
  sta gime_flag
  lda #$38
  sta text_block
  ldd #$0400
  std text_address
-# gime mmu blocks initialized by Color BASIC
+# gime mmu slots are initialized by Color BASIC
  bra init_common
 
 init_jr
+ clr $71 # force cold start on reset
 # flag Jr
  lda #$0
  sta gime_flag
- lda #$38			# lowest banks start at $38
+ lda #$38 # lowest banks start at $38
 # load default mmu
  ldx #$ffa0
  ldy #$ffa8
@@ -345,13 +344,20 @@ write_character_loop
  rts
 
 timer_test
+# save palette
+ lda $ffbd
+ anda #%00111111
+ sta save_palette
+ 
 # turn off all pia interrupts
  lda $ff01
+ sta save_pia0a
  anda #%00111110
  sta $ff01
  lda $ff00
  
  lda $ff03
+ sta save_pia0b
  anda #%00111110
  sta $ff03
  lda $ff02
@@ -400,8 +406,7 @@ checker_loop
  
  ldx #hex
 
-# turn on cpu interrupts
- andcc #$af
+ bsr turn_on_ints
 
 tt_loop
  ldy #$400
@@ -430,6 +435,8 @@ tt_loop
  beq tt_inc1
  cmpa #'Z
  beq tt_dec1
+ cmpa #'Q
+ beq tt_cleanup
  bra tt_loop
 tt_inc10
  ldd timer_value
@@ -451,9 +458,31 @@ tt_dec1
  subd #1
  std timer_value
  bra tt_loop
-
 hex fcb 48,49,50,51,52,53,54,54,56,57,1,2,3,4,5,6
-
+save_pia0a rmb 1
+save_pia0b rmb 1
+save_palette rmb 1
+tt_cleanup
+ bsr turn_off_ints
+# turn off gime interrupts
+ lda gime_0
+ anda #%11001111
+ sta gime_0
+ sta $ff90
+# turn off interrupt flags
+ clra
+ sta $ff93
+ sta $ff92
+# restore PIA
+ lda save_pia0a
+ sta $ff01
+ lda save_pia0b
+ sta $ff03
+# restore palette
+ lda save_palette
+ sta $ffbd
+ rts
+ 
 tt_isr_firq
  pshs a
  lda #0 
@@ -646,7 +675,6 @@ co_clear_last_line_loop
 wait
 #
 # subroutine
-# output to text screen
 #
 wait_loop
  jsr keyin

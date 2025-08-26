@@ -40,3 +40,4 @@ Option 6:
 7. On timer interrupt set palette display to black.
 8. 'A' and 'S' keys can adjust time value by 10
 9. 'Z' and 'X' keys can adjust timer value by 1
+10. 'Q' to exit
