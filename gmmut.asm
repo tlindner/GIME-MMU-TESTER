@@ -94,7 +94,7 @@ main_menu
  fcc "3) TEST TASK SWITCHING\r"
  fcc "-) TEST CONSTANT RAM\r"
  fcc "5) SHOW VDG WRAP AROUND\r"
- fcn "6) FAST TIMER TEST\r"
+ fcn "6) SLOW TIMER TEST\r"
 init_loop
  decb
  bne mm_skip
@@ -232,6 +232,34 @@ rc_printTable
  jsr charout_hex
  bsr strout
  fcn "\r"
+# look for anomaly in table
+ lda out_param
+ ldx #buffer
+rc_loop
+ cmpa ,x+
+ beq rc_pass
+ ldd #buffer
+ pshs d
+ leax -1,x
+ pshs x
+ bsr strout
+ fcn "ANOMALY FOUND IN TABLE POSITION: "
+ puls d
+ subd ,s++
+ tfr b,a
+ jsr charout_hex
+ bsr strout
+ fcn "\r"
+ rts
+rc_pass
+ cmpx #buffer+256
+ beq rc_done
+ inca
+ cmpa #0
+ bne rc_loop
+ lda out_param
+ bra rc_loop
+rc_done
  rts
  
 vdg_wrap
