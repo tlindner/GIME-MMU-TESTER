@@ -92,7 +92,7 @@ main_menu
  fcc "GIME MMU TESTER\r"
  fcc "2MB AWARE\r"
  fcc "1) COUNT AVAILABLE MMU BANKS\r"
- fcc "-) MMU BLOCK REGISTER WIDTH\r"
+ fcc "-) MMU SLOT REGISTER WIDTH\r"
  fcc "-) TEST TASK SWITCHING\r"
  fcc "-) TEST CONSTANT RAM\r"
  fcc "5) SHOW VDG WRAP AROUND\r"
@@ -116,26 +116,26 @@ mm_skip
  bsr chrout
  ldb ,s
  subb #'1
- cmpb #7
- bgt mm_done
+ cmpb #5
+ bhi mm_done
  lslb
  ldx #jump_table
  jsr [b,x]
 done_after
  ldb ,s
  subb #'1
- cmpb #7
- bgt mm_done
+ cmpb #5
+ bhi mm_done
  lslb
  ldx #post_jump_table
  jsr [b,x]
+mm_done
  bsr strout
  fcn "PRESS ANY KEY TO CONTINUE\r"
 mm_wait
  bsr keyin
  cmpa #0
  beq mm_wait
-mm_done
  puls b
  jmp main_menu
 

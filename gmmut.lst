@@ -68,7 +68,7 @@
 606F FD6004           (        gmmut.asm):00067          std text_address
                       (        gmmut.asm):00068         # change to all ram mode
 6072 8E8000           (        gmmut.asm):00069          ldx #$8000
-6075 1705B0           (        gmmut.asm):00070          bsr turn_off_ints   # need to turn off interrupts before swapping in RAM
+6075 1705AF           (        gmmut.asm):00070          bsr turn_off_ints   # need to turn off interrupts before swapping in RAM
 6078                  (        gmmut.asm):00071         ram_loop
 6078 B7FFDE           (        gmmut.asm):00072          sta $ffde
 607B EC84             (        gmmut.asm):00073          ldd ,x
@@ -78,7 +78,7 @@
 6085 26F1             (        gmmut.asm):00077          bne ram_loop
                       (        gmmut.asm):00078         
 6087                  (        gmmut.asm):00079         init_common
-6087 17059E           (        gmmut.asm):00080          bsr turn_off_ints
+6087 17059D           (        gmmut.asm):00080          bsr turn_off_ints
                       (        gmmut.asm):00081         # turn on mmu, task 0, no const ram (for both gime and jr)
 608A 86C4             (        gmmut.asm):00082          lda #$c4
 608C B76008           (        gmmut.asm):00083          sta gime_0
@@ -88,8 +88,8 @@
 6097 B7FF91           (        gmmut.asm):00087          sta $ff91
                       (        gmmut.asm):00088         
 609A                  (        gmmut.asm):00089         main_menu
-609A 1705BB           (        gmmut.asm):00090          bsr clear_screen
-609D 1705CC           (        gmmut.asm):00091          bsr strout
+609A 1705BA           (        gmmut.asm):00090          bsr clear_screen
+609D 1705CB           (        gmmut.asm):00091          bsr strout
 60A0 47494D45204D4D55 (        gmmut.asm):00092          fcc "GIME MMU TESTER\r"
      205445535445520D
 60B0 324D422041574152 (        gmmut.asm):00093          fcc "2MB AWARE\r"
@@ -98,631 +98,631 @@
      20415641494C4142
      4C45204D4D552042
      414E4B530D
-60D7 2D29204D4D552042 (        gmmut.asm):00095          fcc "-) MMU BLOCK REGISTER WIDTH\r"
-     4C4F434B20524547
-     4953544552205749
-     4454480D
-60F3 2D29205445535420 (        gmmut.asm):00096          fcc "-) TEST TASK SWITCHING\r"
+60D7 2D29204D4D552053 (        gmmut.asm):00095          fcc "-) MMU SLOT REGISTER WIDTH\r"
+     4C4F542052454749
+     5354455220574944
+     54480D
+60F2 2D29205445535420 (        gmmut.asm):00096          fcc "-) TEST TASK SWITCHING\r"
      5441534B20535749
      544348494E470D
-610A 2D29205445535420 (        gmmut.asm):00097          fcc "-) TEST CONSTANT RAM\r"
+6109 2D29205445535420 (        gmmut.asm):00097          fcc "-) TEST CONSTANT RAM\r"
      434F4E5354414E54
      2052414D0D
-611F 35292053484F5720 (        gmmut.asm):00098          fcc "5) SHOW VDG WRAP AROUND\r"
+611E 35292053484F5720 (        gmmut.asm):00098          fcc "5) SHOW VDG WRAP AROUND\r"
      5644472057524150
      2041524F554E440D
-6137 3629204641535420 (        gmmut.asm):00099          fcn "6) FAST TIMER TEST\r"
+6136 3629204641535420 (        gmmut.asm):00099          fcn "6) FAST TIMER TEST\r"
      54494D4552205445
      53540D00
-614B                  (        gmmut.asm):00100         init_loop
-614B 5A               (        gmmut.asm):00101          decb
-614C 1026000E         (        gmmut.asm):00102          bne mm_skip
-6150 3404             (        gmmut.asm):00103          pshs b
-6152 BE6004           (        gmmut.asm):00104          ldx text_address
-6155 FC6006           (        gmmut.asm):00105          ldd text_position
-6158 308B             (        gmmut.asm):00106          leax d,x
-615A 6384             (        gmmut.asm):00107          com ,x
-615C 3504             (        gmmut.asm):00108          puls b
-615E                  (        gmmut.asm):00109         mm_skip
-615E 1705B6           (        gmmut.asm):00110          bsr keyin
-6161 8100             (        gmmut.asm):00111          cmpa #0
-6163 27E6             (        gmmut.asm):00112          beq init_loop
-6165 3402             (        gmmut.asm):00113          pshs a
-6167 17053C           (        gmmut.asm):00114          bsr chrout
-616A 860D             (        gmmut.asm):00115          lda #$0d
-616C 170537           (        gmmut.asm):00116          bsr chrout
-616F E6E4             (        gmmut.asm):00117          ldb ,s
-6171 C031             (        gmmut.asm):00118          subb #'1
-6173 C107             (        gmmut.asm):00119          cmpb #7
-6175 102E003B         (        gmmut.asm):00120          bgt mm_done
-6179 58               (        gmmut.asm):00121          lslb
-617A 8E61B9           (        gmmut.asm):00122          ldx #jump_table
-617D AD95             (        gmmut.asm):00123          jsr [b,x]
-617F                  (        gmmut.asm):00124         done_after
-617F E6E4             (        gmmut.asm):00125          ldb ,s
-6181 C031             (        gmmut.asm):00126          subb #'1
-6183 C107             (        gmmut.asm):00127          cmpb #7
-6185 102E002B         (        gmmut.asm):00128          bgt mm_done
-6189 58               (        gmmut.asm):00129          lslb
-618A 8E61C5           (        gmmut.asm):00130          ldx #post_jump_table
-618D AD95             (        gmmut.asm):00131          jsr [b,x]
-618F 1704DA           (        gmmut.asm):00132          bsr strout
-6192 505245535320414E (        gmmut.asm):00133          fcn "PRESS ANY KEY TO CONTINUE\r"
+614A                  (        gmmut.asm):00100         init_loop
+614A 5A               (        gmmut.asm):00101          decb
+614B 1026000E         (        gmmut.asm):00102          bne mm_skip
+614F 3404             (        gmmut.asm):00103          pshs b
+6151 BE6004           (        gmmut.asm):00104          ldx text_address
+6154 FC6006           (        gmmut.asm):00105          ldd text_position
+6157 308B             (        gmmut.asm):00106          leax d,x
+6159 6384             (        gmmut.asm):00107          com ,x
+615B 3504             (        gmmut.asm):00108          puls b
+615D                  (        gmmut.asm):00109         mm_skip
+615D 1705B6           (        gmmut.asm):00110          bsr keyin
+6160 8100             (        gmmut.asm):00111          cmpa #0
+6162 27E6             (        gmmut.asm):00112          beq init_loop
+6164 3402             (        gmmut.asm):00113          pshs a
+6166 17053C           (        gmmut.asm):00114          bsr chrout
+6169 860D             (        gmmut.asm):00115          lda #$0d
+616B 170537           (        gmmut.asm):00116          bsr chrout
+616E E6E4             (        gmmut.asm):00117          ldb ,s
+6170 C031             (        gmmut.asm):00118          subb #'1
+6172 C105             (        gmmut.asm):00119          cmpb #5
+6174 10220016         (        gmmut.asm):00120          bhi mm_done
+6178 58               (        gmmut.asm):00121          lslb
+6179 8E61B8           (        gmmut.asm):00122          ldx #jump_table
+617C AD95             (        gmmut.asm):00123          jsr [b,x]
+617E                  (        gmmut.asm):00124         done_after
+617E E6E4             (        gmmut.asm):00125          ldb ,s
+6180 C031             (        gmmut.asm):00126          subb #'1
+6182 C105             (        gmmut.asm):00127          cmpb #5
+6184 10220006         (        gmmut.asm):00128          bhi mm_done
+6188 58               (        gmmut.asm):00129          lslb
+6189 8E61C4           (        gmmut.asm):00130          ldx #post_jump_table
+618C AD95             (        gmmut.asm):00131          jsr [b,x]
+618E                  (        gmmut.asm):00132         mm_done
+618E 1704DA           (        gmmut.asm):00133          bsr strout
+6191 505245535320414E (        gmmut.asm):00134          fcn "PRESS ANY KEY TO CONTINUE\r"
      59204B455920544F
      20434F4E54494E55
      450D00
-61AD                  (        gmmut.asm):00134         mm_wait
-61AD 170567           (        gmmut.asm):00135          bsr keyin
-61B0 8100             (        gmmut.asm):00136          cmpa #0
-61B2 27F9             (        gmmut.asm):00137          beq mm_wait
-61B4                  (        gmmut.asm):00138         mm_done
-61B4 3504             (        gmmut.asm):00139          puls b
-61B6 7E609A           (        gmmut.asm):00140          jmp main_menu
+61AC                  (        gmmut.asm):00135         mm_wait
+61AC 170567           (        gmmut.asm):00136          bsr keyin
+61AF 8100             (        gmmut.asm):00137          cmpa #0
+61B1 27F9             (        gmmut.asm):00138          beq mm_wait
+61B3 3504             (        gmmut.asm):00139          puls b
+61B5 7E609A           (        gmmut.asm):00140          jmp main_menu
                       (        gmmut.asm):00141         
-61B9                  (        gmmut.asm):00142         jump_table
-61B9 61D2             (        gmmut.asm):00143          fdb count_mmu_blocks
-61BB 61D1             (        gmmut.asm):00144          fdb return
-61BD 61D1             (        gmmut.asm):00145          fdb return
-61BF 61D1             (        gmmut.asm):00146          fdb return
-61C1 62EB             (        gmmut.asm):00147          fdb vdg_wrap
-61C3 64FD             (        gmmut.asm):00148          fdb timer_test
+61B8                  (        gmmut.asm):00142         jump_table
+61B8 61D1             (        gmmut.asm):00143          fdb count_mmu_blocks
+61BA 61D0             (        gmmut.asm):00144          fdb return
+61BC 61D0             (        gmmut.asm):00145          fdb return
+61BE 61D0             (        gmmut.asm):00146          fdb return
+61C0 62EA             (        gmmut.asm):00147          fdb vdg_wrap
+61C2 64FC             (        gmmut.asm):00148          fdb timer_test
                       (        gmmut.asm):00149         
-61C5                  (        gmmut.asm):00150         post_jump_table
-61C5 620F             (        gmmut.asm):00151          fdb report_count_mmu
-61C7 61D1             (        gmmut.asm):00152          fdb return
-61C9 61D1             (        gmmut.asm):00153          fdb return
-61CB 61D1             (        gmmut.asm):00154          fdb return
-61CD 61D1             (        gmmut.asm):00155          fdb return
-61CF 61D1             (        gmmut.asm):00156          fdb return
+61C4                  (        gmmut.asm):00150         post_jump_table
+61C4 620E             (        gmmut.asm):00151          fdb report_count_mmu
+61C6 61D0             (        gmmut.asm):00152          fdb return
+61C8 61D0             (        gmmut.asm):00153          fdb return
+61CA 61D0             (        gmmut.asm):00154          fdb return
+61CC 61D0             (        gmmut.asm):00155          fdb return
+61CE 61D0             (        gmmut.asm):00156          fdb return
                       (        gmmut.asm):00157         
-61D1                  (        gmmut.asm):00158         return
-61D1 39               (        gmmut.asm):00159          rts
+61D0                  (        gmmut.asm):00158         return
+61D0 39               (        gmmut.asm):00159          rts
                       (        gmmut.asm):00160                 
-61D2                  (        gmmut.asm):00161         count_mmu_blocks
-61D2 17046B           (        gmmut.asm):00162          bsr save_task_0
+61D1                  (        gmmut.asm):00161         count_mmu_blocks
+61D1 17046B           (        gmmut.asm):00162          bsr save_task_0
                       (        gmmut.asm):00163         # Put mmu block number in first byte of each block
                       (        gmmut.asm):00164         # and save value
-61D5 5F               (        gmmut.asm):00165          clrb
-61D6 8E68F3           (        gmmut.asm):00166          ldx #buffer2
-61D9                  (        gmmut.asm):00167         count_bocks_loop
-61D9 F7FFA1           (        gmmut.asm):00168          stb $ffa1
-61DC B62000           (        gmmut.asm):00169          lda $2000
-61DF A780             (        gmmut.asm):00170          sta ,x+
-61E1 F72000           (        gmmut.asm):00171          stb $2000
-61E4 5C               (        gmmut.asm):00172          incb
-61E5 26F2             (        gmmut.asm):00173          bne count_bocks_loop
+61D4 5F               (        gmmut.asm):00165          clrb
+61D5 8E68F2           (        gmmut.asm):00166          ldx #buffer2
+61D8                  (        gmmut.asm):00167         count_bocks_loop
+61D8 F7FFA1           (        gmmut.asm):00168          stb $ffa1
+61DB B62000           (        gmmut.asm):00169          lda $2000
+61DE A780             (        gmmut.asm):00170          sta ,x+
+61E0 F72000           (        gmmut.asm):00171          stb $2000
+61E3 5C               (        gmmut.asm):00172          incb
+61E4 26F2             (        gmmut.asm):00173          bne count_bocks_loop
                       (        gmmut.asm):00174         # fill buffer with what is
                       (        gmmut.asm):00175         # left in the first byte of each block
-61E7 5F               (        gmmut.asm):00176          clrb
-61E8 8E67F3           (        gmmut.asm):00177          ldx #buffer
-61EB                  (        gmmut.asm):00178         count_loop
-61EB F7FFA1           (        gmmut.asm):00179          stb $ffa1
-61EE B62000           (        gmmut.asm):00180          lda $2000
-61F1 A780             (        gmmut.asm):00181          sta ,x+
-61F3 5C               (        gmmut.asm):00182          incb
-61F4 26F5             (        gmmut.asm):00183          bne count_loop
+61E6 5F               (        gmmut.asm):00176          clrb
+61E7 8E67F2           (        gmmut.asm):00177          ldx #buffer
+61EA                  (        gmmut.asm):00178         count_loop
+61EA F7FFA1           (        gmmut.asm):00179          stb $ffa1
+61ED B62000           (        gmmut.asm):00180          lda $2000
+61F0 A780             (        gmmut.asm):00181          sta ,x+
+61F2 5C               (        gmmut.asm):00182          incb
+61F3 26F5             (        gmmut.asm):00183          bne count_loop
                       (        gmmut.asm):00184         # report first byte of buffer
-61F6 B667F3           (        gmmut.asm):00185          lda buffer
-61F9 B76001           (        gmmut.asm):00186          sta out_param
+61F5 B667F2           (        gmmut.asm):00185          lda buffer
+61F8 B76001           (        gmmut.asm):00186          sta out_param
                       (        gmmut.asm):00187         # fix up overwritten bytes
-61FC 5F               (        gmmut.asm):00188          clrb
-61FD 8E68F3           (        gmmut.asm):00189          ldx #buffer2
-6200                  (        gmmut.asm):00190         restore_loop
-6200 F7FFA1           (        gmmut.asm):00191          stb $ffa1
-6203 A680             (        gmmut.asm):00192          lda ,x+
-6205 B72000           (        gmmut.asm):00193          sta $2000
-6208 5C               (        gmmut.asm):00194          incb
-6209 26F5             (        gmmut.asm):00195          bne restore_loop
-620B 170428           (        gmmut.asm):00196          bsr restore_task_0
-620E 39               (        gmmut.asm):00197          rts 
+61FB 5F               (        gmmut.asm):00188          clrb
+61FC 8E68F2           (        gmmut.asm):00189          ldx #buffer2
+61FF                  (        gmmut.asm):00190         restore_loop
+61FF F7FFA1           (        gmmut.asm):00191          stb $ffa1
+6202 A680             (        gmmut.asm):00192          lda ,x+
+6204 B72000           (        gmmut.asm):00193          sta $2000
+6207 5C               (        gmmut.asm):00194          incb
+6208 26F5             (        gmmut.asm):00195          bne restore_loop
+620A 170428           (        gmmut.asm):00196          bsr restore_task_0
+620D 39               (        gmmut.asm):00197          rts 
                       (        gmmut.asm):00198         
-620F                  (        gmmut.asm):00199         report_count_mmu
-620F B66001           (        gmmut.asm):00200          lda out_param
-6212 81F0             (        gmmut.asm):00201          cmpa #$f0
-6214 10270032         (        gmmut.asm):00202          beq rc_128k
-6218 81E0             (        gmmut.asm):00203          cmpa #$e0
-621A 10270045         (        gmmut.asm):00204          beq rc_256k
-621E 81C0             (        gmmut.asm):00205          cmpa #$c0
-6220 10270058         (        gmmut.asm):00206          beq rc_512k
-6224 8180             (        gmmut.asm):00207          cmpa #$80
-6226 1027006B         (        gmmut.asm):00208          beq rc_1024k
-622A 8100             (        gmmut.asm):00209          cmpa #$00
-622C 1027007F         (        gmmut.asm):00210          beq rc_2048k
-6230 170439           (        gmmut.asm):00211          bsr strout
-6233 554E4B4E4F574E20 (        gmmut.asm):00212          fcn "UNKNOWN RAM AMOUNT\r"
+620E                  (        gmmut.asm):00199         report_count_mmu
+620E B66001           (        gmmut.asm):00200          lda out_param
+6211 81F0             (        gmmut.asm):00201          cmpa #$f0
+6213 10270032         (        gmmut.asm):00202          beq rc_128k
+6217 81E0             (        gmmut.asm):00203          cmpa #$e0
+6219 10270045         (        gmmut.asm):00204          beq rc_256k
+621D 81C0             (        gmmut.asm):00205          cmpa #$c0
+621F 10270058         (        gmmut.asm):00206          beq rc_512k
+6223 8180             (        gmmut.asm):00207          cmpa #$80
+6225 1027006B         (        gmmut.asm):00208          beq rc_1024k
+6229 8100             (        gmmut.asm):00209          cmpa #$00
+622B 1027007F         (        gmmut.asm):00210          beq rc_2048k
+622F 170439           (        gmmut.asm):00211          bsr strout
+6232 554E4B4E4F574E20 (        gmmut.asm):00212          fcn "UNKNOWN RAM AMOUNT\r"
      52414D20414D4F55
      4E540D00
-6247 16007C           (        gmmut.asm):00213          bra rc_printTable
-624A                  (        gmmut.asm):00214         rc_128k
-624A 17041F           (        gmmut.asm):00215          bsr strout
-624D 3132384B202D2024 (        gmmut.asm):00216          fcn "128K - $30 TO $3F\r"
+6246 16007C           (        gmmut.asm):00213          bra rc_printTable
+6249                  (        gmmut.asm):00214         rc_128k
+6249 17041F           (        gmmut.asm):00215          bsr strout
+624C 3132384B202D2024 (        gmmut.asm):00216          fcn "128K - $30 TO $3F\r"
      333020544F202433
      460D00
-6260 160063           (        gmmut.asm):00217          bra rc_printTable
-6263                  (        gmmut.asm):00218         rc_256k
-6263 170406           (        gmmut.asm):00219          bsr strout
-6266 3235364B202D2024 (        gmmut.asm):00220          fcn "256K - $20 TO $3F\r"
+625F 160063           (        gmmut.asm):00217          bra rc_printTable
+6262                  (        gmmut.asm):00218         rc_256k
+6262 170406           (        gmmut.asm):00219          bsr strout
+6265 3235364B202D2024 (        gmmut.asm):00220          fcn "256K - $20 TO $3F\r"
      323020544F202433
      460D00
-6279 16004A           (        gmmut.asm):00221          bra rc_printTable
-627C                  (        gmmut.asm):00222         rc_512k
-627C 1703ED           (        gmmut.asm):00223          bsr strout
-627F 3531324B202D2024 (        gmmut.asm):00224          fcn "512K - $00 TO $3F\r"
+6278 16004A           (        gmmut.asm):00221          bra rc_printTable
+627B                  (        gmmut.asm):00222         rc_512k
+627B 1703ED           (        gmmut.asm):00223          bsr strout
+627E 3531324B202D2024 (        gmmut.asm):00224          fcn "512K - $00 TO $3F\r"
      303020544F202433
      460D00
-6292 160031           (        gmmut.asm):00225          bra rc_printTable
-6295                  (        gmmut.asm):00226         rc_1024k
-6295 1703D4           (        gmmut.asm):00227          bsr strout
-6298 313032344B202D20 (        gmmut.asm):00228          fcn "1024K - $00 TO $7F\r"
+6291 160031           (        gmmut.asm):00225          bra rc_printTable
+6294                  (        gmmut.asm):00226         rc_1024k
+6294 1703D4           (        gmmut.asm):00227          bsr strout
+6297 313032344B202D20 (        gmmut.asm):00228          fcn "1024K - $00 TO $7F\r"
      24303020544F2024
      37460D00
-62AC 160017           (        gmmut.asm):00229          bra rc_printTable
-62AF                  (        gmmut.asm):00230         rc_2048k
-62AF 1703BA           (        gmmut.asm):00231          bsr strout
-62B2 323034384B202D20 (        gmmut.asm):00232          fcn "2048K - $00 TO $FF\r"
+62AB 160017           (        gmmut.asm):00229          bra rc_printTable
+62AE                  (        gmmut.asm):00230         rc_2048k
+62AE 1703BA           (        gmmut.asm):00231          bsr strout
+62B1 323034384B202D20 (        gmmut.asm):00232          fcn "2048K - $00 TO $FF\r"
      24303020544F2024
      46460D00
-62C6                  (        gmmut.asm):00233         rc_printTable
-62C6 1703A3           (        gmmut.asm):00234          bsr strout
-62C9 4649525354204259 (        gmmut.asm):00235          fcn "FIRST BYTE OF TABLE: "
+62C5                  (        gmmut.asm):00233         rc_printTable
+62C5 1703A3           (        gmmut.asm):00234          bsr strout
+62C8 4649525354204259 (        gmmut.asm):00235          fcn "FIRST BYTE OF TABLE: "
      5445204F46205441
      424C453A2000
-62DF B667F3           (        gmmut.asm):00236          lda buffer
-62E2 BD667B           (        gmmut.asm):00237          jsr charout_hex
-62E5 170384           (        gmmut.asm):00238          bsr strout
-62E8 0D00             (        gmmut.asm):00239          fcn "\r"
-62EA 39               (        gmmut.asm):00240          rts
+62DE B667F2           (        gmmut.asm):00236          lda buffer
+62E1 BD667A           (        gmmut.asm):00237          jsr charout_hex
+62E4 170384           (        gmmut.asm):00238          bsr strout
+62E7 0D00             (        gmmut.asm):00239          fcn "\r"
+62E9 39               (        gmmut.asm):00240          rts
                       (        gmmut.asm):00241          
-62EB                  (        gmmut.asm):00242         vdg_wrap
-62EB 170352           (        gmmut.asm):00243          bsr save_task_0
+62EA                  (        gmmut.asm):00242         vdg_wrap
+62EA 170352           (        gmmut.asm):00243          bsr save_task_0
                       (        gmmut.asm):00244         # explain what is going to happen
-62EE 17037B           (        gmmut.asm):00245          bsr strout
-62F1 0D544845204E4558 (        gmmut.asm):00246          fcc "\rTHE NEXT SCREEN WILL BE A PMODE 4 "
+62ED 17037B           (        gmmut.asm):00245          bsr strout
+62F0 0D544845204E4558 (        gmmut.asm):00246          fcc "\rTHE NEXT SCREEN WILL BE A PMODE 4 "
      542053435245454E
      2057494C4C204245
      204120504D4F4445
      203420
-6314 4752415048494353 (        gmmut.asm):00247          fcc "GRAPHICS SCREEN WITH THE START ADDRESS "
+6313 4752415048494353 (        gmmut.asm):00247          fcc "GRAPHICS SCREEN WITH THE START ADDRESS "
      2053435245454E20
      5749544820544845
      2053544152542041
      44445245535320
-633B 53455420544F2024 (        gmmut.asm):00248          fcc "SET TO $FE00.\r"
+633A 53455420544F2024 (        gmmut.asm):00248          fcc "SET TO $FE00.\r"
      464530302E0D
-6349 5448452057524150 (        gmmut.asm):00249          fcc "THE WRAP AROUND MMU PAGE WILL BE IDENTIFIED."
+6348 5448452057524150 (        gmmut.asm):00249          fcc "THE WRAP AROUND MMU PAGE WILL BE IDENTIFIED."
      2041524F554E4420
      4D4D552050414745
      2057494C4C204245
      204944454E544946
      4945442E
-6375 0D50524553532041 (        gmmut.asm):00250          fcn "\rPRESS ANY KEY TO CONTINUE\r\r"
+6374 0D50524553532041 (        gmmut.asm):00250          fcn "\rPRESS ANY KEY TO CONTINUE\r\r"
      4E59204B45592054
      4F20434F4E54494E
      55450D0D00
                       (        gmmut.asm):00251         
-6392                  (        gmmut.asm):00252         vw_wait
-6392 170382           (        gmmut.asm):00253          bsr keyin
-6395 8100             (        gmmut.asm):00254          cmpa #0
-6397 27F9             (        gmmut.asm):00255          beq vw_wait
+6391                  (        gmmut.asm):00252         vw_wait
+6391 170382           (        gmmut.asm):00253          bsr keyin
+6394 8100             (        gmmut.asm):00254          cmpa #0
+6396 27F9             (        gmmut.asm):00255          beq vw_wait
                       (        gmmut.asm):00256         
                       (        gmmut.asm):00257         # Set Sam to PMODE 4
-6399 86F0             (        gmmut.asm):00258          lda #%11110000
-639B B7FFC5           (        gmmut.asm):00259          sta $ffc5
-639E B7FFC3           (        gmmut.asm):00260          sta $ffc3
-63A1 B7FFC0           (        gmmut.asm):00261          sta $ffc0
-63A4 B7FF22           (        gmmut.asm):00262          sta $ff22
+6398 86F0             (        gmmut.asm):00258          lda #%11110000
+639A B7FFC5           (        gmmut.asm):00259          sta $ffc5
+639D B7FFC3           (        gmmut.asm):00260          sta $ffc3
+63A0 B7FFC0           (        gmmut.asm):00261          sta $ffc0
+63A3 B7FF22           (        gmmut.asm):00262          sta $ff22
                       (        gmmut.asm):00263         # set SAM to highest base address ($FE00)
                       (        gmmut.asm):00264         # for video
-63A7 867F             (        gmmut.asm):00265          lda #%01111111
-63A9 170265           (        gmmut.asm):00266          bsr store_a_into_sam_offset
+63A6 867F             (        gmmut.asm):00265          lda #%01111111
+63A8 170265           (        gmmut.asm):00266          bsr store_a_into_sam_offset
                       (        gmmut.asm):00267         
-63AC 863F             (        gmmut.asm):00268          lda #$3f
-63AE B7FFA1           (        gmmut.asm):00269          sta $ffa1
-63B1 17011C           (        gmmut.asm):00270          bsr write_string
-63B4 2000             (        gmmut.asm):00271          fdb $2000
-63B6 506167653A203366 (        gmmut.asm):00272          fcn "Page: 3f, Offset: 0000 "
+63AB 863F             (        gmmut.asm):00268          lda #$3f
+63AD B7FFA1           (        gmmut.asm):00269          sta $ffa1
+63B0 17011C           (        gmmut.asm):00270          bsr write_string
+63B3 2000             (        gmmut.asm):00271          fdb $2000
+63B5 506167653A203366 (        gmmut.asm):00272          fcn "Page: 3f, Offset: 0000 "
      2C204F6666736574
      3A20303030302000
-63CE 1700FF           (        gmmut.asm):00273          bsr write_string
-63D1 3E00             (        gmmut.asm):00274          fdb $3e00
-63D3 506167653A203366 (        gmmut.asm):00275          fcn "Page: 3f, Offset: 1e00 "
+63CD 1700FF           (        gmmut.asm):00273          bsr write_string
+63D0 3E00             (        gmmut.asm):00274          fdb $3e00
+63D2 506167653A203366 (        gmmut.asm):00275          fcn "Page: 3f, Offset: 1e00 "
      2C204F6666736574
      3A20316530302000
                       (        gmmut.asm):00276          
-63EB 8607             (        gmmut.asm):00277          lda #$7
-63ED B7FFA1           (        gmmut.asm):00278          sta $ffa1
-63F0 1700DD           (        gmmut.asm):00279          bsr write_string
-63F3 2000             (        gmmut.asm):00280          fdb $2000
-63F5 506167653A203037 (        gmmut.asm):00281          fcn "Page: 07, Offset: 0000 "
+63EA 8607             (        gmmut.asm):00277          lda #$7
+63EC B7FFA1           (        gmmut.asm):00278          sta $ffa1
+63EF 1700DD           (        gmmut.asm):00279          bsr write_string
+63F2 2000             (        gmmut.asm):00280          fdb $2000
+63F4 506167653A203037 (        gmmut.asm):00281          fcn "Page: 07, Offset: 0000 "
      2C204F6666736574
      3A20303030302000
-640D 1700C0           (        gmmut.asm):00282          bsr write_string
-6410 3E00             (        gmmut.asm):00283          fdb $3e00
-6412 506167653A203037 (        gmmut.asm):00284          fcn "Page: 07, Offset: 1e00 "
+640C 1700C0           (        gmmut.asm):00282          bsr write_string
+640F 3E00             (        gmmut.asm):00283          fdb $3e00
+6411 506167653A203037 (        gmmut.asm):00284          fcn "Page: 07, Offset: 1e00 "
      2C204F6666736574
      3A20316530302000
                       (        gmmut.asm):00285         
-642A 8638             (        gmmut.asm):00286          lda #$38
-642C B7FFA1           (        gmmut.asm):00287          sta $ffa1
-642F 17009E           (        gmmut.asm):00288          bsr write_string
-6432 2000             (        gmmut.asm):00289          fdb $2000
-6434 506167653A203338 (        gmmut.asm):00290          fcn "Page: 38, Offset: 0000 "
+6429 8638             (        gmmut.asm):00286          lda #$38
+642B B7FFA1           (        gmmut.asm):00287          sta $ffa1
+642E 17009E           (        gmmut.asm):00288          bsr write_string
+6431 2000             (        gmmut.asm):00289          fdb $2000
+6433 506167653A203338 (        gmmut.asm):00290          fcn "Page: 38, Offset: 0000 "
      2C204F6666736574
      3A20303030302000
                       (        gmmut.asm):00291         
-644C 8640             (        gmmut.asm):00292          lda #$40
-644E B7FFA1           (        gmmut.asm):00293          sta $ffa1
-6451 17007C           (        gmmut.asm):00294          bsr write_string
-6454 2000             (        gmmut.asm):00295          fdb $2000
-6456 506167653A203430 (        gmmut.asm):00296          fcn "Page: 40, Offset: 0000 "
+644B 8640             (        gmmut.asm):00292          lda #$40
+644D B7FFA1           (        gmmut.asm):00293          sta $ffa1
+6450 17007C           (        gmmut.asm):00294          bsr write_string
+6453 2000             (        gmmut.asm):00295          fdb $2000
+6455 506167653A203430 (        gmmut.asm):00296          fcn "Page: 40, Offset: 0000 "
      2C204F6666736574
      3A20303030302000
                       (        gmmut.asm):00297         
-646E 8600             (        gmmut.asm):00298          lda #$00
-6470 B7FFA1           (        gmmut.asm):00299          sta $ffa1
-6473 17005A           (        gmmut.asm):00300          bsr write_string
-6476 2000             (        gmmut.asm):00301          fdb $2000
-6478 506167653A203030 (        gmmut.asm):00302          fcn "Page: 00, Offset: 0000 "
+646D 8600             (        gmmut.asm):00298          lda #$00
+646F B7FFA1           (        gmmut.asm):00299          sta $ffa1
+6472 17005A           (        gmmut.asm):00300          bsr write_string
+6475 2000             (        gmmut.asm):00301          fdb $2000
+6477 506167653A203030 (        gmmut.asm):00302          fcn "Page: 00, Offset: 0000 "
      2C204F6666736574
      3A20303030302000
                       (        gmmut.asm):00303          
-6490 8608             (        gmmut.asm):00304          lda #$8
-6492 B7FFA1           (        gmmut.asm):00305          sta $ffa1
-6495 170038           (        gmmut.asm):00306          bsr write_string
-6498 2000             (        gmmut.asm):00307          fdb $2000
-649A 506167653A203038 (        gmmut.asm):00308          fcn "Page: 08, Offset: 0000 "
+648F 8608             (        gmmut.asm):00304          lda #$8
+6491 B7FFA1           (        gmmut.asm):00305          sta $ffa1
+6494 170038           (        gmmut.asm):00306          bsr write_string
+6497 2000             (        gmmut.asm):00307          fdb $2000
+6499 506167653A203038 (        gmmut.asm):00308          fcn "Page: 08, Offset: 0000 "
      2C204F6666736574
      3A20303030302000
                       (        gmmut.asm):00309         
-64B2                  (        gmmut.asm):00310         dp_wait
-64B2 170262           (        gmmut.asm):00311          bsr keyin
-64B5 8100             (        gmmut.asm):00312          cmpa #0
-64B7 27F9             (        gmmut.asm):00313          beq dp_wait
+64B1                  (        gmmut.asm):00310         dp_wait
+64B1 170262           (        gmmut.asm):00311          bsr keyin
+64B4 8100             (        gmmut.asm):00312          cmpa #0
+64B6 27F9             (        gmmut.asm):00313          beq dp_wait
                       (        gmmut.asm):00314         
-64B9 17017A           (        gmmut.asm):00315          bsr restore_task_0
+64B8 17017A           (        gmmut.asm):00315          bsr restore_task_0
                       (        gmmut.asm):00316         # Set Sam to text mode
-64BC 8600             (        gmmut.asm):00317          lda #$00
-64BE B7FFC0           (        gmmut.asm):00318          sta $ffc0
-64C1 B7FFC2           (        gmmut.asm):00319          sta $ffc2
-64C4 B7FFC4           (        gmmut.asm):00320          sta $ffc4
-64C7 B7FF22           (        gmmut.asm):00321          sta $ff22
+64BB 8600             (        gmmut.asm):00317          lda #$00
+64BD B7FFC0           (        gmmut.asm):00318          sta $ffc0
+64C0 B7FFC2           (        gmmut.asm):00319          sta $ffc2
+64C3 B7FFC4           (        gmmut.asm):00320          sta $ffc4
+64C6 B7FF22           (        gmmut.asm):00321          sta $ff22
                       (        gmmut.asm):00322         # set SAM to text screen base address ($0400)
                       (        gmmut.asm):00323         # for video
-64CA 8602             (        gmmut.asm):00324          lda #%00000010
-64CC 170142           (        gmmut.asm):00325          bsr store_a_into_sam_offset
-64CF 39               (        gmmut.asm):00326          rts
+64C9 8602             (        gmmut.asm):00324          lda #%00000010
+64CB 170142           (        gmmut.asm):00325          bsr store_a_into_sam_offset
+64CE 39               (        gmmut.asm):00326          rts
                       (        gmmut.asm):00327         
-64D0                  (        gmmut.asm):00328         write_string
-64D0 3540             (        gmmut.asm):00329          puls u
-64D2 10AEC1           (        gmmut.asm):00330          ldy ,u++
-64D5                  (        gmmut.asm):00331         write_string_loop
-64D5 A6C0             (        gmmut.asm):00332          lda ,u+
-64D7 1027000B         (        gmmut.asm):00333          beq write_string_done
-64DB 8020             (        gmmut.asm):00334          suba #32
-64DD 170008           (        gmmut.asm):00335          bsr write_character
-64E0 31A9FF01         (        gmmut.asm):00336          leay (-8*32)+1,y
-64E4 20EF             (        gmmut.asm):00337          bra write_string_loop
-64E6                  (        gmmut.asm):00338         write_string_done
-64E6 1F35             (        gmmut.asm):00339          tfr u,pc
+64CF                  (        gmmut.asm):00328         write_string
+64CF 3540             (        gmmut.asm):00329          puls u
+64D1 10AEC1           (        gmmut.asm):00330          ldy ,u++
+64D4                  (        gmmut.asm):00331         write_string_loop
+64D4 A6C0             (        gmmut.asm):00332          lda ,u+
+64D6 1027000B         (        gmmut.asm):00333          beq write_string_done
+64DA 8020             (        gmmut.asm):00334          suba #32
+64DC 170008           (        gmmut.asm):00335          bsr write_character
+64DF 31A9FF01         (        gmmut.asm):00336          leay (-8*32)+1,y
+64E3 20EF             (        gmmut.asm):00337          bra write_string_loop
+64E5                  (        gmmut.asm):00338         write_string_done
+64E5 1F35             (        gmmut.asm):00339          tfr u,pc
                       (        gmmut.asm):00340         
-64E8                  (        gmmut.asm):00341         write_character
-64E8 8E69F3           (        gmmut.asm):00342          ldx #bitmap_font
-64EB C608             (        gmmut.asm):00343          ldb #8
-64ED 3D               (        gmmut.asm):00344          mul
-64EE 308B             (        gmmut.asm):00345          leax d,x
-64F0 C608             (        gmmut.asm):00346          ldb #8
-64F2                  (        gmmut.asm):00347         write_character_loop
-64F2 A680             (        gmmut.asm):00348          lda ,x+
-64F4 A7A4             (        gmmut.asm):00349          sta ,y
-64F6 31A820           (        gmmut.asm):00350          leay 32,y
-64F9 5A               (        gmmut.asm):00351          decb
-64FA 26F6             (        gmmut.asm):00352          bne write_character_loop
-64FC 39               (        gmmut.asm):00353          rts
+64E7                  (        gmmut.asm):00341         write_character
+64E7 8E69F2           (        gmmut.asm):00342          ldx #bitmap_font
+64EA C608             (        gmmut.asm):00343          ldb #8
+64EC 3D               (        gmmut.asm):00344          mul
+64ED 308B             (        gmmut.asm):00345          leax d,x
+64EF C608             (        gmmut.asm):00346          ldb #8
+64F1                  (        gmmut.asm):00347         write_character_loop
+64F1 A680             (        gmmut.asm):00348          lda ,x+
+64F3 A7A4             (        gmmut.asm):00349          sta ,y
+64F5 31A820           (        gmmut.asm):00350          leay 32,y
+64F8 5A               (        gmmut.asm):00351          decb
+64F9 26F6             (        gmmut.asm):00352          bne write_character_loop
+64FB 39               (        gmmut.asm):00353          rts
                       (        gmmut.asm):00354         
-64FD                  (        gmmut.asm):00355         timer_test
+64FC                  (        gmmut.asm):00355         timer_test
                       (        gmmut.asm):00356         # turn off all pia interrupts
-64FD B6FF01           (        gmmut.asm):00357          lda $ff01
-6500 843E             (        gmmut.asm):00358          anda #%00111110
-6502 B7FF01           (        gmmut.asm):00359          sta $ff01
-6505 B6FF00           (        gmmut.asm):00360          lda $ff00
+64FC B6FF01           (        gmmut.asm):00357          lda $ff01
+64FF 843E             (        gmmut.asm):00358          anda #%00111110
+6501 B7FF01           (        gmmut.asm):00359          sta $ff01
+6504 B6FF00           (        gmmut.asm):00360          lda $ff00
                       (        gmmut.asm):00361          
-6508 B6FF03           (        gmmut.asm):00362          lda $ff03
-650B 843E             (        gmmut.asm):00363          anda #%00111110
-650D B7FF03           (        gmmut.asm):00364          sta $ff03
-6510 B6FF02           (        gmmut.asm):00365          lda $ff02
+6507 B6FF03           (        gmmut.asm):00362          lda $ff03
+650A 843E             (        gmmut.asm):00363          anda #%00111110
+650C B7FF03           (        gmmut.asm):00364          sta $ff03
+650F B6FF02           (        gmmut.asm):00365          lda $ff02
                       (        gmmut.asm):00366          
                       (        gmmut.asm):00367         # install both isr
-6513 867E             (        gmmut.asm):00368          lda #$7e # JMP instruction extended
-6515 B7FEF4           (        gmmut.asm):00369          sta $fef4
-6518 B7FEF7           (        gmmut.asm):00370          sta $fef7
-651B CC65E7           (        gmmut.asm):00371          ldd #tt_isr_firq
-651E FDFEF5           (        gmmut.asm):00372          std $fef5
-6521 CC65FC           (        gmmut.asm):00373          ldd #tt_isr_irq
-6524 FDFEF8           (        gmmut.asm):00374          std $fef8
+6512 867E             (        gmmut.asm):00368          lda #$7e # JMP instruction extended
+6514 B7FEF4           (        gmmut.asm):00369          sta $fef4
+6517 B7FEF7           (        gmmut.asm):00370          sta $fef7
+651A CC65E6           (        gmmut.asm):00371          ldd #tt_isr_firq
+651D FDFEF5           (        gmmut.asm):00372          std $fef5
+6520 CC65FB           (        gmmut.asm):00373          ldd #tt_isr_irq
+6523 FDFEF8           (        gmmut.asm):00374          std $fef8
                       (        gmmut.asm):00375         
                       (        gmmut.asm):00376         # setup timer
-6527 8600             (        gmmut.asm):00377          lda #0 # lsb of timer
-6529 B7FF95           (        gmmut.asm):00378          sta $ff95
-652C 8600             (        gmmut.asm):00379          lda #0 # msb of timer
-652E B7FF94           (        gmmut.asm):00380          sta $ff94
-6531 8620             (        gmmut.asm):00381          lda #%00100000 # firq for timer
-6533 B7FF93           (        gmmut.asm):00382          sta $ff93
-6536 8608             (        gmmut.asm):00383          lda #%00001000 # irq for vertical border
-6538 B7FF92           (        gmmut.asm):00384          sta $ff92
-653B B6FF92           (        gmmut.asm):00385          lda $ff92
-653E B6FF93           (        gmmut.asm):00386          lda $ff93
+6526 8600             (        gmmut.asm):00377          lda #0 # lsb of timer
+6528 B7FF95           (        gmmut.asm):00378          sta $ff95
+652B 8600             (        gmmut.asm):00379          lda #0 # msb of timer
+652D B7FF94           (        gmmut.asm):00380          sta $ff94
+6530 8620             (        gmmut.asm):00381          lda #%00100000 # firq for timer
+6532 B7FF93           (        gmmut.asm):00382          sta $ff93
+6535 8608             (        gmmut.asm):00383          lda #%00001000 # irq for vertical border
+6537 B7FF92           (        gmmut.asm):00384          sta $ff92
+653A B6FF92           (        gmmut.asm):00385          lda $ff92
+653D B6FF93           (        gmmut.asm):00386          lda $ff93
                       (        gmmut.asm):00387         
                       (        gmmut.asm):00388         # set timer source
-6541 B66009           (        gmmut.asm):00389          lda gime_1
-6544 8A00             (        gmmut.asm):00390          ora #%00000000 # slow - 15khz
-6546 B76009           (        gmmut.asm):00391          sta gime_1
-6549 B7FF91           (        gmmut.asm):00392          sta $ff91
+6540 B66009           (        gmmut.asm):00389          lda gime_1
+6543 8A00             (        gmmut.asm):00390          ora #%00000000 # slow - 15khz
+6545 B76009           (        gmmut.asm):00391          sta gime_1
+6548 B7FF91           (        gmmut.asm):00392          sta $ff91
                       (        gmmut.asm):00393          
                       (        gmmut.asm):00394         # turn on gime interrupts
-654C B66008           (        gmmut.asm):00395          lda gime_0
-654F 8A30             (        gmmut.asm):00396          ora #%00110000
-6551 B76008           (        gmmut.asm):00397          sta gime_0
-6554 B7FF90           (        gmmut.asm):00398          sta $ff90
+654B B66008           (        gmmut.asm):00395          lda gime_0
+654E 8A30             (        gmmut.asm):00396          ora #%00110000
+6550 B76008           (        gmmut.asm):00397          sta gime_0
+6553 B7FF90           (        gmmut.asm):00398          sta $ff90
                       (        gmmut.asm):00399         
-6557 1700FE           (        gmmut.asm):00400          bsr clear_screen
-655A CCE6E6           (        gmmut.asm):00401          ldd #$e6e6
-655D 8E041F           (        gmmut.asm):00402          ldx #$400+31
-6560                  (        gmmut.asm):00403         checker_loop
-6560 ED84             (        gmmut.asm):00404          std ,x
-6562 308820           (        gmmut.asm):00405          leax 32,x
-6565 8C061F           (        gmmut.asm):00406          cmpx #$400+31+(32*16)
-6568 26F6             (        gmmut.asm):00407          bne checker_loop
+6556 1700FE           (        gmmut.asm):00400          bsr clear_screen
+6559 CCE6E6           (        gmmut.asm):00401          ldd #$e6e6
+655C 8E041F           (        gmmut.asm):00402          ldx #$400+31
+655F                  (        gmmut.asm):00403         checker_loop
+655F ED84             (        gmmut.asm):00404          std ,x
+6561 308820           (        gmmut.asm):00405          leax 32,x
+6564 8C061F           (        gmmut.asm):00406          cmpx #$400+31+(32*16)
+6567 26F6             (        gmmut.asm):00407          bne checker_loop
                       (        gmmut.asm):00408          
-656A 8E65D7           (        gmmut.asm):00409          ldx #hex
+6569 8E65D6           (        gmmut.asm):00409          ldx #hex
                       (        gmmut.asm):00410         
                       (        gmmut.asm):00411         # turn on cpu interrupts
-656D 1CAF             (        gmmut.asm):00412          andcc #$af
+656C 1CAF             (        gmmut.asm):00412          andcc #$af
                       (        gmmut.asm):00413         
-656F                  (        gmmut.asm):00414         tt_loop
-656F 108E0400         (        gmmut.asm):00415          ldy #$400
-6573 FC65FA           (        gmmut.asm):00416          ldd timer_value
-6576 840F             (        gmmut.asm):00417          anda #$0f
-6578 A686             (        gmmut.asm):00418          lda a,x
-657A A7A0             (        gmmut.asm):00419          sta ,y+
-657C 1F98             (        gmmut.asm):00420          tfr b,a
-657E 44               (        gmmut.asm):00421          lsra
-657F 44               (        gmmut.asm):00422          lsra
-6580 44               (        gmmut.asm):00423          lsra
-6581 44               (        gmmut.asm):00424          lsra
-6582 A686             (        gmmut.asm):00425          lda a,x
-6584 A7A0             (        gmmut.asm):00426          sta ,y+
-6586 1F98             (        gmmut.asm):00427          tfr b,a
-6588 840F             (        gmmut.asm):00428          anda #$0f
-658A A686             (        gmmut.asm):00429          lda a,x
-658C A7A1             (        gmmut.asm):00430          sta ,y++
+656E                  (        gmmut.asm):00414         tt_loop
+656E 108E0400         (        gmmut.asm):00415          ldy #$400
+6572 FC65F9           (        gmmut.asm):00416          ldd timer_value
+6575 840F             (        gmmut.asm):00417          anda #$0f
+6577 A686             (        gmmut.asm):00418          lda a,x
+6579 A7A0             (        gmmut.asm):00419          sta ,y+
+657B 1F98             (        gmmut.asm):00420          tfr b,a
+657D 44               (        gmmut.asm):00421          lsra
+657E 44               (        gmmut.asm):00422          lsra
+657F 44               (        gmmut.asm):00423          lsra
+6580 44               (        gmmut.asm):00424          lsra
+6581 A686             (        gmmut.asm):00425          lda a,x
+6583 A7A0             (        gmmut.asm):00426          sta ,y+
+6585 1F98             (        gmmut.asm):00427          tfr b,a
+6587 840F             (        gmmut.asm):00428          anda #$0f
+6589 A686             (        gmmut.asm):00429          lda a,x
+658B A7A1             (        gmmut.asm):00430          sta ,y++
                       (        gmmut.asm):00431          
-658E 170186           (        gmmut.asm):00432          bsr keyin
-6591 8153             (        gmmut.asm):00433          cmpa #'S
-6593 10270014         (        gmmut.asm):00434          beq tt_inc10
-6597 8141             (        gmmut.asm):00435          cmpa #'A
-6599 10270019         (        gmmut.asm):00436          beq tt_dec10
-659D 8158             (        gmmut.asm):00437          cmpa #'X
-659F 1027001E         (        gmmut.asm):00438          beq tt_inc1
-65A3 815A             (        gmmut.asm):00439          cmpa #'Z
-65A5 10270023         (        gmmut.asm):00440          beq tt_dec1
-65A9 20C4             (        gmmut.asm):00441          bra tt_loop
-65AB                  (        gmmut.asm):00442         tt_inc10
-65AB FC65FA           (        gmmut.asm):00443          ldd timer_value
-65AE C3000A           (        gmmut.asm):00444          addd #10
-65B1 FD65FA           (        gmmut.asm):00445          std timer_value
-65B4 20B9             (        gmmut.asm):00446          bra tt_loop
-65B6                  (        gmmut.asm):00447         tt_dec10
-65B6 FC65FA           (        gmmut.asm):00448          ldd timer_value
-65B9 83000A           (        gmmut.asm):00449          subd #10
-65BC FD65FA           (        gmmut.asm):00450          std timer_value
-65BF 20AE             (        gmmut.asm):00451          bra tt_loop
-65C1                  (        gmmut.asm):00452         tt_inc1
-65C1 FC65FA           (        gmmut.asm):00453          ldd timer_value
-65C4 C30001           (        gmmut.asm):00454          addd #1
-65C7 FD65FA           (        gmmut.asm):00455          std timer_value
-65CA 20A3             (        gmmut.asm):00456          bra tt_loop
-65CC                  (        gmmut.asm):00457         tt_dec1
-65CC FC65FA           (        gmmut.asm):00458          ldd timer_value
-65CF 830001           (        gmmut.asm):00459          subd #1
-65D2 FD65FA           (        gmmut.asm):00460          std timer_value
-65D5 2098             (        gmmut.asm):00461          bra tt_loop
+658D 170186           (        gmmut.asm):00432          bsr keyin
+6590 8153             (        gmmut.asm):00433          cmpa #'S
+6592 10270014         (        gmmut.asm):00434          beq tt_inc10
+6596 8141             (        gmmut.asm):00435          cmpa #'A
+6598 10270019         (        gmmut.asm):00436          beq tt_dec10
+659C 8158             (        gmmut.asm):00437          cmpa #'X
+659E 1027001E         (        gmmut.asm):00438          beq tt_inc1
+65A2 815A             (        gmmut.asm):00439          cmpa #'Z
+65A4 10270023         (        gmmut.asm):00440          beq tt_dec1
+65A8 20C4             (        gmmut.asm):00441          bra tt_loop
+65AA                  (        gmmut.asm):00442         tt_inc10
+65AA FC65F9           (        gmmut.asm):00443          ldd timer_value
+65AD C3000A           (        gmmut.asm):00444          addd #10
+65B0 FD65F9           (        gmmut.asm):00445          std timer_value
+65B3 20B9             (        gmmut.asm):00446          bra tt_loop
+65B5                  (        gmmut.asm):00447         tt_dec10
+65B5 FC65F9           (        gmmut.asm):00448          ldd timer_value
+65B8 83000A           (        gmmut.asm):00449          subd #10
+65BB FD65F9           (        gmmut.asm):00450          std timer_value
+65BE 20AE             (        gmmut.asm):00451          bra tt_loop
+65C0                  (        gmmut.asm):00452         tt_inc1
+65C0 FC65F9           (        gmmut.asm):00453          ldd timer_value
+65C3 C30001           (        gmmut.asm):00454          addd #1
+65C6 FD65F9           (        gmmut.asm):00455          std timer_value
+65C9 20A3             (        gmmut.asm):00456          bra tt_loop
+65CB                  (        gmmut.asm):00457         tt_dec1
+65CB FC65F9           (        gmmut.asm):00458          ldd timer_value
+65CE 830001           (        gmmut.asm):00459          subd #1
+65D1 FD65F9           (        gmmut.asm):00460          std timer_value
+65D4 2098             (        gmmut.asm):00461          bra tt_loop
                       (        gmmut.asm):00462         
-65D7 3031323334353636 (        gmmut.asm):00463         hex fcb 48,49,50,51,52,53,54,54,56,57,1,2,3,4,5,6
+65D6 3031323334353636 (        gmmut.asm):00463         hex fcb 48,49,50,51,52,53,54,54,56,57,1,2,3,4,5,6
      3839010203040506
                       (        gmmut.asm):00464         
-65E7                  (        gmmut.asm):00465         tt_isr_firq
-65E7 3402             (        gmmut.asm):00466          pshs a
-65E9 8600             (        gmmut.asm):00467          lda #0 
-65EB B7FFBD           (        gmmut.asm):00468          sta $ffbd
-65EE B7FF95           (        gmmut.asm):00469          sta $ff95 # zero timer count down
-65F1 B7FF94           (        gmmut.asm):00470          sta $ff94
-65F4 B6FF93           (        gmmut.asm):00471          lda $ff93
-65F7 3502             (        gmmut.asm):00472          puls a
+65E6                  (        gmmut.asm):00465         tt_isr_firq
+65E6 3402             (        gmmut.asm):00466          pshs a
+65E8 8600             (        gmmut.asm):00467          lda #0 
+65EA B7FFBD           (        gmmut.asm):00468          sta $ffbd
+65ED B7FF95           (        gmmut.asm):00469          sta $ff95 # zero timer count down
+65F0 B7FF94           (        gmmut.asm):00470          sta $ff94
+65F3 B6FF93           (        gmmut.asm):00471          lda $ff93
+65F6 3502             (        gmmut.asm):00472          puls a
                       (        gmmut.asm):00473         #  inc $401
-65F9 3B               (        gmmut.asm):00474          rti
+65F8 3B               (        gmmut.asm):00474          rti
                       (        gmmut.asm):00475         
-65FA 0080             (        gmmut.asm):00476         timer_value fdb $0080
-65FC                  (        gmmut.asm):00477         tt_isr_irq
-65FC 86FF             (        gmmut.asm):00478          lda #$ff
-65FE B7FFBD           (        gmmut.asm):00479          sta $ffbd
-6601 FC65FA           (        gmmut.asm):00480          ldd timer_value # reset timer count down
-6604 F7FF95           (        gmmut.asm):00481          stb $ff95
-6607 B7FF94           (        gmmut.asm):00482          sta $ff94
+65F9 0080             (        gmmut.asm):00476         timer_value fdb $0080
+65FB                  (        gmmut.asm):00477         tt_isr_irq
+65FB 86FF             (        gmmut.asm):00478          lda #$ff
+65FD B7FFBD           (        gmmut.asm):00479          sta $ffbd
+6600 FC65F9           (        gmmut.asm):00480          ldd timer_value # reset timer count down
+6603 F7FF95           (        gmmut.asm):00481          stb $ff95
+6606 B7FF94           (        gmmut.asm):00482          sta $ff94
                       (        gmmut.asm):00483         #  inc $402
-660A B6FF92           (        gmmut.asm):00484          lda $ff92 # clear the irq interrupt
-660D B6FF93           (        gmmut.asm):00485          lda $ff93 # Also clear the firq interrupt
-6610 3B               (        gmmut.asm):00486          rti
+6609 B6FF92           (        gmmut.asm):00484          lda $ff92 # clear the irq interrupt
+660C B6FF93           (        gmmut.asm):00485          lda $ff93 # Also clear the firq interrupt
+660F 3B               (        gmmut.asm):00486          rti
                       (        gmmut.asm):00487          
                       (        gmmut.asm):00488         #
                       (        gmmut.asm):00489         # subroutine
                       (        gmmut.asm):00490         # Store reg a into sam video offset register
                       (        gmmut.asm):00491         #
-6611                  (        gmmut.asm):00492         store_a_into_sam_offset
-6611 C607             (        gmmut.asm):00493          ldb #7
-6613 8EFFC6           (        gmmut.asm):00494          ldx #$ffc6
-6616                  (        gmmut.asm):00495         loop_store_a
-6616 46               (        gmmut.asm):00496          rora
-6617 10240007         (        gmmut.asm):00497          bcc set_clear
-661B                  (        gmmut.asm):00498         set_set
-661B 3001             (        gmmut.asm):00499          leax 1,x
-661D A780             (        gmmut.asm):00500          sta ,x+
-661F 160002           (        gmmut.asm):00501          bra set_done
-6622                  (        gmmut.asm):00502         set_clear
-6622 A781             (        gmmut.asm):00503          sta ,x++
-6624                  (        gmmut.asm):00504         set_done 
-6624 5A               (        gmmut.asm):00505          decb
-6625 26EF             (        gmmut.asm):00506          bne loop_store_a
-6627 39               (        gmmut.asm):00507          rts
+6610                  (        gmmut.asm):00492         store_a_into_sam_offset
+6610 C607             (        gmmut.asm):00493          ldb #7
+6612 8EFFC6           (        gmmut.asm):00494          ldx #$ffc6
+6615                  (        gmmut.asm):00495         loop_store_a
+6615 46               (        gmmut.asm):00496          rora
+6616 10240007         (        gmmut.asm):00497          bcc set_clear
+661A                  (        gmmut.asm):00498         set_set
+661A 3001             (        gmmut.asm):00499          leax 1,x
+661C A780             (        gmmut.asm):00500          sta ,x+
+661E 160002           (        gmmut.asm):00501          bra set_done
+6621                  (        gmmut.asm):00502         set_clear
+6621 A781             (        gmmut.asm):00503          sta ,x++
+6623                  (        gmmut.asm):00504         set_done 
+6623 5A               (        gmmut.asm):00505          decb
+6624 26EF             (        gmmut.asm):00506          bne loop_store_a
+6626 39               (        gmmut.asm):00507          rts
                       (        gmmut.asm):00508         
                       (        gmmut.asm):00509         #
                       (        gmmut.asm):00510         # subroutine
                       (        gmmut.asm):00511         # turn off all interrupts
                       (        gmmut.asm):00512         #
-6628                  (        gmmut.asm):00513         turn_off_ints
-6628 1A50             (        gmmut.asm):00514          orcc #$50
-662A 39               (        gmmut.asm):00515          rts
+6627                  (        gmmut.asm):00513         turn_off_ints
+6627 1A50             (        gmmut.asm):00514          orcc #$50
+6629 39               (        gmmut.asm):00515          rts
                       (        gmmut.asm):00516         
                       (        gmmut.asm):00517         #
                       (        gmmut.asm):00518         # subroutine
                       (        gmmut.asm):00519         # turn on all interrupts
                       (        gmmut.asm):00520         #
-662B                  (        gmmut.asm):00521         turn_on_ints
-662B 1CAF             (        gmmut.asm):00522          andcc #$af
-662D 39               (        gmmut.asm):00523          rts
+662A                  (        gmmut.asm):00521         turn_on_ints
+662A 1CAF             (        gmmut.asm):00522          andcc #$af
+662C 39               (        gmmut.asm):00523          rts
                       (        gmmut.asm):00524          
-662E                  (        gmmut.asm):00525         saved_task rmb 8
+662D                  (        gmmut.asm):00525         saved_task rmb 8
                       (        gmmut.asm):00526          
-6636                  (        gmmut.asm):00527         restore_task_0
+6635                  (        gmmut.asm):00527         restore_task_0
                       (        gmmut.asm):00528         #
                       (        gmmut.asm):00529         # subroutine
                       (        gmmut.asm):00530         # restore mmu regs at ffa0
                       (        gmmut.asm):00531         #
-6636 108E662E         (        gmmut.asm):00532          ldy #saved_task
-663A 8EFFA0           (        gmmut.asm):00533          ldx #$ffa0
-663D 160007           (        gmmut.asm):00534          bra copy_task
+6635 108E662D         (        gmmut.asm):00532          ldy #saved_task
+6639 8EFFA0           (        gmmut.asm):00533          ldx #$ffa0
+663C 160007           (        gmmut.asm):00534          bra copy_task
                       (        gmmut.asm):00535          
-6640                  (        gmmut.asm):00536         save_task_0
+663F                  (        gmmut.asm):00536         save_task_0
                       (        gmmut.asm):00537         #
                       (        gmmut.asm):00538         # subroutine
                       (        gmmut.asm):00539         # save mmu regs at ffa0
                       (        gmmut.asm):00540         #
-6640 108EFFA0         (        gmmut.asm):00541          ldy #$ffa0
-6644 8E662E           (        gmmut.asm):00542          ldx #saved_task
-6647                  (        gmmut.asm):00543         copy_task
-6647 ECA1             (        gmmut.asm):00544          ldd ,y++
-6649 ED81             (        gmmut.asm):00545          std ,x++
-664B ECA1             (        gmmut.asm):00546          ldd ,y++
-664D ED81             (        gmmut.asm):00547          std ,x++
-664F ECA1             (        gmmut.asm):00548          ldd ,y++
-6651 ED81             (        gmmut.asm):00549          std ,x++
-6653 ECA1             (        gmmut.asm):00550          ldd ,y++
-6655 ED81             (        gmmut.asm):00551          std ,x++
-6657 39               (        gmmut.asm):00552          rts
+663F 108EFFA0         (        gmmut.asm):00541          ldy #$ffa0
+6643 8E662D           (        gmmut.asm):00542          ldx #saved_task
+6646                  (        gmmut.asm):00543         copy_task
+6646 ECA1             (        gmmut.asm):00544          ldd ,y++
+6648 ED81             (        gmmut.asm):00545          std ,x++
+664A ECA1             (        gmmut.asm):00546          ldd ,y++
+664C ED81             (        gmmut.asm):00547          std ,x++
+664E ECA1             (        gmmut.asm):00548          ldd ,y++
+6650 ED81             (        gmmut.asm):00549          std ,x++
+6652 ECA1             (        gmmut.asm):00550          ldd ,y++
+6654 ED81             (        gmmut.asm):00551          std ,x++
+6656 39               (        gmmut.asm):00552          rts
                       (        gmmut.asm):00553         
-6658                  (        gmmut.asm):00554         clear_screen
+6657                  (        gmmut.asm):00554         clear_screen
                       (        gmmut.asm):00555         #
                       (        gmmut.asm):00556         # subroutine
                       (        gmmut.asm):00557         # clear the text screen
                       (        gmmut.asm):00558         #
-6658 8E0400           (        gmmut.asm):00559          ldx #$0400
-665B CC6060           (        gmmut.asm):00560          ldd #$6060
-665E                  (        gmmut.asm):00561         cs_loop
-665E ED81             (        gmmut.asm):00562          std ,x++
-6660 8C0600           (        gmmut.asm):00563          cmpx #$600
-6663 26F9             (        gmmut.asm):00564          bne cs_loop
-6665 7F6006           (        gmmut.asm):00565          clr text_position
-6668 7F6007           (        gmmut.asm):00566          clr text_position+1
-666B 39               (        gmmut.asm):00567          rts
+6657 8E0400           (        gmmut.asm):00559          ldx #$0400
+665A CC6060           (        gmmut.asm):00560          ldd #$6060
+665D                  (        gmmut.asm):00561         cs_loop
+665D ED81             (        gmmut.asm):00562          std ,x++
+665F 8C0600           (        gmmut.asm):00563          cmpx #$600
+6662 26F9             (        gmmut.asm):00564          bne cs_loop
+6664 7F6006           (        gmmut.asm):00565          clr text_position
+6667 7F6007           (        gmmut.asm):00566          clr text_position+1
+666A 39               (        gmmut.asm):00567          rts
                       (        gmmut.asm):00568          
-666C                  (        gmmut.asm):00569         strout
+666B                  (        gmmut.asm):00569         strout
                       (        gmmut.asm):00570         #
                       (        gmmut.asm):00571         # subroutine
                       (        gmmut.asm):00572         # Output string to screen
                       (        gmmut.asm):00573         #
-666C 3540             (        gmmut.asm):00574          puls u
-666E                  (        gmmut.asm):00575         so_loop
-666E A6C0             (        gmmut.asm):00576          lda ,u+
-6670 10270005         (        gmmut.asm):00577          beq so_done
-6674 BD66A6           (        gmmut.asm):00578          jsr chrout
-6677 20F5             (        gmmut.asm):00579          bra so_loop
-6679                  (        gmmut.asm):00580         so_done
-6679 1F35             (        gmmut.asm):00581          tfr u,pc
+666B 3540             (        gmmut.asm):00574          puls u
+666D                  (        gmmut.asm):00575         so_loop
+666D A6C0             (        gmmut.asm):00576          lda ,u+
+666F 10270005         (        gmmut.asm):00577          beq so_done
+6673 BD66A5           (        gmmut.asm):00578          jsr chrout
+6676 20F5             (        gmmut.asm):00579          bra so_loop
+6678                  (        gmmut.asm):00580         so_done
+6678 1F35             (        gmmut.asm):00581          tfr u,pc
                       (        gmmut.asm):00582         
-667B                  (        gmmut.asm):00583         charout_hex
-667B 3432             (        gmmut.asm):00584          pshs a,y,x
-667D 108E6696         (        gmmut.asm):00585          ldy #hex_ascii
-6681 44               (        gmmut.asm):00586          lsra
-6682 44               (        gmmut.asm):00587          lsra
-6683 44               (        gmmut.asm):00588          lsra
-6684 44               (        gmmut.asm):00589          lsra
-6685 A6A6             (        gmmut.asm):00590          lda a,y
-6687 BD66A6           (        gmmut.asm):00591          jsr chrout
-668A A6E4             (        gmmut.asm):00592          lda ,s
-668C 840F             (        gmmut.asm):00593          anda #$0f
-668E A6A6             (        gmmut.asm):00594          lda a,y
-6690 BD66A6           (        gmmut.asm):00595          jsr chrout
-6693 3532             (        gmmut.asm):00596          puls a,y,x
-6695 39               (        gmmut.asm):00597          rts
+667A                  (        gmmut.asm):00583         charout_hex
+667A 3432             (        gmmut.asm):00584          pshs a,y,x
+667C 108E6695         (        gmmut.asm):00585          ldy #hex_ascii
+6680 44               (        gmmut.asm):00586          lsra
+6681 44               (        gmmut.asm):00587          lsra
+6682 44               (        gmmut.asm):00588          lsra
+6683 44               (        gmmut.asm):00589          lsra
+6684 A6A6             (        gmmut.asm):00590          lda a,y
+6686 BD66A5           (        gmmut.asm):00591          jsr chrout
+6689 A6E4             (        gmmut.asm):00592          lda ,s
+668B 840F             (        gmmut.asm):00593          anda #$0f
+668D A6A6             (        gmmut.asm):00594          lda a,y
+668F BD66A5           (        gmmut.asm):00595          jsr chrout
+6692 3532             (        gmmut.asm):00596          puls a,y,x
+6694 39               (        gmmut.asm):00597          rts
                       (        gmmut.asm):00598         
-6696 3031323334353637 (        gmmut.asm):00599         hex_ascii fcc "0123456789ABCDEF"
+6695 3031323334353637 (        gmmut.asm):00599         hex_ascii fcc "0123456789ABCDEF"
      3839414243444546
                       (        gmmut.asm):00600         
-66A6                  (        gmmut.asm):00601         chrout
+66A5                  (        gmmut.asm):00601         chrout
                       (        gmmut.asm):00602         #
                       (        gmmut.asm):00603         # subroutine
                       (        gmmut.asm):00604         # output to text screen
                       (        gmmut.asm):00605         #
-66A6 810D             (        gmmut.asm):00606          cmpa #$0d
-66A8 1027002D         (        gmmut.asm):00607          beq co_carrage_return
-66AC 8160             (        gmmut.asm):00608          cmpa #$60
-66AE 102C000B         (        gmmut.asm):00609          bge co_sub60
-66B2 8140             (        gmmut.asm):00610          cmpa #$40
-66B4 102C0007         (        gmmut.asm):00611          bge co_out
-66B8                  (        gmmut.asm):00612         co_add40
-66B8 8B40             (        gmmut.asm):00613          adda #$40
-66BA 160002           (        gmmut.asm):00614          bra co_out
-66BD                  (        gmmut.asm):00615         co_sub60
-66BD 8060             (        gmmut.asm):00616          suba #$60
-66BF                  (        gmmut.asm):00617         co_out
-66BF 3402             (        gmmut.asm):00618          pshs a
-66C1 BE6004           (        gmmut.asm):00619          ldx text_address
-66C4 FC6006           (        gmmut.asm):00620          ldd text_position
-66C7 308B             (        gmmut.asm):00621          leax d,x
-66C9 C30001           (        gmmut.asm):00622          addd #1
-66CC FD6006           (        gmmut.asm):00623          std text_position
-66CF 3502             (        gmmut.asm):00624          puls a
-66D1 A784             (        gmmut.asm):00625          sta ,x
-66D3 FC6006           (        gmmut.asm):00626          ldd text_position
-66D6 16000B           (        gmmut.asm):00627          bra co_check_scroll
-66D9                  (        gmmut.asm):00628         co_carrage_return
-66D9 FC6006           (        gmmut.asm):00629          ldd text_position
-66DC C30020           (        gmmut.asm):00630          addd #32
-66DF C4E0             (        gmmut.asm):00631          andb #%11100000
-66E1 FD6006           (        gmmut.asm):00632          std text_position
-66E4                  (        gmmut.asm):00633         co_check_scroll
-66E4 10830200         (        gmmut.asm):00634          cmpd #512
-66E8 10270001         (        gmmut.asm):00635          beq co_scroll
-66EC 39               (        gmmut.asm):00636          rts
-66ED                  (        gmmut.asm):00637         co_scroll
-66ED BE6004           (        gmmut.asm):00638          ldx text_address
-66F0                  (        gmmut.asm):00639         co_scroll_loop
-66F0 EC8820           (        gmmut.asm):00640          ldd 32,x
-66F3 ED81             (        gmmut.asm):00641          std ,x++
-66F5 8C05E0           (        gmmut.asm):00642          cmpx #$0600-32
-66F8 26F6             (        gmmut.asm):00643          bne co_scroll_loop
-66FA CC6060           (        gmmut.asm):00644          ldd #$6060
-66FD                  (        gmmut.asm):00645         co_clear_last_line_loop
-66FD ED81             (        gmmut.asm):00646          std ,x++
-66FF 8C0600           (        gmmut.asm):00647          cmpx #$0600
-6702 26F9             (        gmmut.asm):00648          bne co_clear_last_line_loop
-6704 FC6006           (        gmmut.asm):00649          ldd text_position
-6707 830020           (        gmmut.asm):00650          subd #32
-670A FD6006           (        gmmut.asm):00651          std text_position
-670D 39               (        gmmut.asm):00652          rts
+66A5 810D             (        gmmut.asm):00606          cmpa #$0d
+66A7 1027002D         (        gmmut.asm):00607          beq co_carrage_return
+66AB 8160             (        gmmut.asm):00608          cmpa #$60
+66AD 102C000B         (        gmmut.asm):00609          bge co_sub60
+66B1 8140             (        gmmut.asm):00610          cmpa #$40
+66B3 102C0007         (        gmmut.asm):00611          bge co_out
+66B7                  (        gmmut.asm):00612         co_add40
+66B7 8B40             (        gmmut.asm):00613          adda #$40
+66B9 160002           (        gmmut.asm):00614          bra co_out
+66BC                  (        gmmut.asm):00615         co_sub60
+66BC 8060             (        gmmut.asm):00616          suba #$60
+66BE                  (        gmmut.asm):00617         co_out
+66BE 3402             (        gmmut.asm):00618          pshs a
+66C0 BE6004           (        gmmut.asm):00619          ldx text_address
+66C3 FC6006           (        gmmut.asm):00620          ldd text_position
+66C6 308B             (        gmmut.asm):00621          leax d,x
+66C8 C30001           (        gmmut.asm):00622          addd #1
+66CB FD6006           (        gmmut.asm):00623          std text_position
+66CE 3502             (        gmmut.asm):00624          puls a
+66D0 A784             (        gmmut.asm):00625          sta ,x
+66D2 FC6006           (        gmmut.asm):00626          ldd text_position
+66D5 16000B           (        gmmut.asm):00627          bra co_check_scroll
+66D8                  (        gmmut.asm):00628         co_carrage_return
+66D8 FC6006           (        gmmut.asm):00629          ldd text_position
+66DB C30020           (        gmmut.asm):00630          addd #32
+66DE C4E0             (        gmmut.asm):00631          andb #%11100000
+66E0 FD6006           (        gmmut.asm):00632          std text_position
+66E3                  (        gmmut.asm):00633         co_check_scroll
+66E3 10830200         (        gmmut.asm):00634          cmpd #512
+66E7 10270001         (        gmmut.asm):00635          beq co_scroll
+66EB 39               (        gmmut.asm):00636          rts
+66EC                  (        gmmut.asm):00637         co_scroll
+66EC BE6004           (        gmmut.asm):00638          ldx text_address
+66EF                  (        gmmut.asm):00639         co_scroll_loop
+66EF EC8820           (        gmmut.asm):00640          ldd 32,x
+66F2 ED81             (        gmmut.asm):00641          std ,x++
+66F4 8C05E0           (        gmmut.asm):00642          cmpx #$0600-32
+66F7 26F6             (        gmmut.asm):00643          bne co_scroll_loop
+66F9 CC6060           (        gmmut.asm):00644          ldd #$6060
+66FC                  (        gmmut.asm):00645         co_clear_last_line_loop
+66FC ED81             (        gmmut.asm):00646          std ,x++
+66FE 8C0600           (        gmmut.asm):00647          cmpx #$0600
+6701 26F9             (        gmmut.asm):00648          bne co_clear_last_line_loop
+6703 FC6006           (        gmmut.asm):00649          ldd text_position
+6706 830020           (        gmmut.asm):00650          subd #32
+6709 FD6006           (        gmmut.asm):00651          std text_position
+670C 39               (        gmmut.asm):00652          rts
                       (        gmmut.asm):00653         
      FF00             (        gmmut.asm):00654         pia0 equ $ff00
-670E                  (        gmmut.asm):00655         keybuf rmb 8 keyboard memory buffer
-6716                  (        gmmut.asm):00656         casflg rmb 1 upper case/lower case flag: $ff=upper, 0=lower
+670D                  (        gmmut.asm):00655         keybuf rmb 8 keyboard memory buffer
+6715                  (        gmmut.asm):00656         casflg rmb 1 upper case/lower case flag: $ff=upper, 0=lower
                       (        gmmut.asm):00657         
                       (        gmmut.asm):00658         # la1c1 clr pia0+2 clear column strobe
                       (        gmmut.asm):00659         #  lda pia0 read key rows
@@ -734,224 +734,224 @@
                       (        gmmut.asm):00665         # this routine gets a keystroke from the keyboard if a key
                       (        gmmut.asm):00666         # is down. it returns zero true if there was no key down.
                       (        gmmut.asm):00667         #
-6717 3454             (        gmmut.asm):00668         keyin pshs u,x,b save registers
-6719 CEFF00           (        gmmut.asm):00669          ldu #pia0 point u to pia0
-671C 8E670E           (        gmmut.asm):00670          ldx #keybuf point x to keyboard memory buffer
-671F 4F               (        gmmut.asm):00671          clra * clear carry flag, set column counter (acca)
-6720 4A               (        gmmut.asm):00672          deca * to $ff
-6721 3412             (        gmmut.asm):00673          pshs x,a save column ctr & 2 blank (x reg) on stack
-6723 A742             (        gmmut.asm):00674          sta 2,u initialize column strobe to $ff
-6725 6942             (        gmmut.asm):00675         la1d9 rol 2,u * rotate column strobe data left 1 bit, carry
-6727 10240050         (        gmmut.asm):00676          bcc la220 * into bit 0 - branch if 8 shifts done
-672B 6CE4             (        gmmut.asm):00677          inc ,s increment column counter
-672D 170069           (        gmmut.asm):00678          bsr la23a read keyboard row data
-6730 A761             (        gmmut.asm):00679          sta 1,s temp store key data
-6732 A884             (        gmmut.asm):00680          eora ,x set any bit where a key has moved
-6734 A484             (        gmmut.asm):00681          anda ,x acca=0 if no new key down, <70 if key was released
-6736 E661             (        gmmut.asm):00682          ldb 1,s get new key data
-6738 E780             (        gmmut.asm):00683          stb ,x+ store it in key memory
-673A 4D               (        gmmut.asm):00684          tsta was a new key down?
-673B 27E8             (        gmmut.asm):00685          beq la1d9 no-check another column
-673D E642             (        gmmut.asm):00686          ldb 2,u * get column strobe data and
-673F E762             (        gmmut.asm):00687          stb 2,s * temp store it on the stack
+6716 3454             (        gmmut.asm):00668         keyin pshs u,x,b save registers
+6718 CEFF00           (        gmmut.asm):00669          ldu #pia0 point u to pia0
+671B 8E670D           (        gmmut.asm):00670          ldx #keybuf point x to keyboard memory buffer
+671E 4F               (        gmmut.asm):00671          clra * clear carry flag, set column counter (acca)
+671F 4A               (        gmmut.asm):00672          deca * to $ff
+6720 3412             (        gmmut.asm):00673          pshs x,a save column ctr & 2 blank (x reg) on stack
+6722 A742             (        gmmut.asm):00674          sta 2,u initialize column strobe to $ff
+6724 6942             (        gmmut.asm):00675         la1d9 rol 2,u * rotate column strobe data left 1 bit, carry
+6726 10240050         (        gmmut.asm):00676          bcc la220 * into bit 0 - branch if 8 shifts done
+672A 6CE4             (        gmmut.asm):00677          inc ,s increment column counter
+672C 170069           (        gmmut.asm):00678          bsr la23a read keyboard row data
+672F A761             (        gmmut.asm):00679          sta 1,s temp store key data
+6731 A884             (        gmmut.asm):00680          eora ,x set any bit where a key has moved
+6733 A484             (        gmmut.asm):00681          anda ,x acca=0 if no new key down, <70 if key was released
+6735 E661             (        gmmut.asm):00682          ldb 1,s get new key data
+6737 E780             (        gmmut.asm):00683          stb ,x+ store it in key memory
+6739 4D               (        gmmut.asm):00684          tsta was a new key down?
+673A 27E8             (        gmmut.asm):00685          beq la1d9 no-check another column
+673C E642             (        gmmut.asm):00686          ldb 2,u * get column strobe data and
+673E E762             (        gmmut.asm):00687          stb 2,s * temp store it on the stack
                       (        gmmut.asm):00688         * this routine converts the key depression into a number
                       (        gmmut.asm):00689         * from 0-50 in accb corresponding to the key that was down
-6741 C6F8             (        gmmut.asm):00690          ldb #$f8 to make sure accb=0 after first addb #8
-6743 CB08             (        gmmut.asm):00691         la1f4 addb #$08 add 8 for each row of keyboard
-6745 44               (        gmmut.asm):00692          lsra acca has the row number of this key - add 8 for each row
-6746 24FB             (        gmmut.asm):00693          bcc la1f4 go on until a zero appears in the carry flag
-6748 EBE4             (        gmmut.asm):00694          addb ,s add in the column number
+6740 C6F8             (        gmmut.asm):00690          ldb #$f8 to make sure accb=0 after first addb #8
+6742 CB08             (        gmmut.asm):00691         la1f4 addb #$08 add 8 for each row of keyboard
+6744 44               (        gmmut.asm):00692          lsra acca has the row number of this key - add 8 for each row
+6745 24FB             (        gmmut.asm):00693          bcc la1f4 go on until a zero appears in the carry flag
+6747 EBE4             (        gmmut.asm):00694          addb ,s add in the column number
                       (        gmmut.asm):00695         * now convert the value in accb into ascii
-674A 10270058         (        gmmut.asm):00696          beq la245
-674E C11A             (        gmmut.asm):00697          cmpb #26 the ‘at sign’ key was down was it a letter?
-6750 10220054         (        gmmut.asm):00698          bhi la247 no
-6754 CA40             (        gmmut.asm):00699          orb #$40 yes, convert to upper case ascii
-6756 170034           (        gmmut.asm):00700          bsr la22e check for the shift key
-6759 BA6716           (        gmmut.asm):00701          ora casflg * ‘or’ in the case flag & branch if in upper
-675C 10260002         (        gmmut.asm):00702          bne la20c * case mode or shift key down
-6760 CA20             (        gmmut.asm):00703          orb #$20 convert to lower case
-6762 E7E4             (        gmmut.asm):00704         la20c stb ,s temp store ascii value
-6764 8E045E           (        gmmut.asm):00705          ldx #$45e get keyboard debounce
-6767 17006D           (        gmmut.asm):00706          bsr la1ae
-676A C6FF             (        gmmut.asm):00707          ldb #$ff set column strobe to all ones (no
-676C 170028           (        gmmut.asm):00708          bsr la238 strobe) and read keyboard
-676F 4C               (        gmmut.asm):00709          inca = incr row data, acca now 0 if no joystick
-6770 10260007         (        gmmut.asm):00710          bne la220 = button down. branch if joystick button down
-6774 E662             (        gmmut.asm):00711         la21a ldb 2,s get column strobe data
-6776 17001E           (        gmmut.asm):00712          bsr la238 read a key
-6779 A161             (        gmmut.asm):00713          cmpa 1,s is it the same key as before debounce?
-677B 3512             (        gmmut.asm):00714         la220 puls a,x remove temp slots from the stack and recover
+6749 10270058         (        gmmut.asm):00696          beq la245
+674D C11A             (        gmmut.asm):00697          cmpb #26 the ‘at sign’ key was down was it a letter?
+674F 10220054         (        gmmut.asm):00698          bhi la247 no
+6753 CA40             (        gmmut.asm):00699          orb #$40 yes, convert to upper case ascii
+6755 170034           (        gmmut.asm):00700          bsr la22e check for the shift key
+6758 BA6715           (        gmmut.asm):00701          ora casflg * ‘or’ in the case flag & branch if in upper
+675B 10260002         (        gmmut.asm):00702          bne la20c * case mode or shift key down
+675F CA20             (        gmmut.asm):00703          orb #$20 convert to lower case
+6761 E7E4             (        gmmut.asm):00704         la20c stb ,s temp store ascii value
+6763 8E045E           (        gmmut.asm):00705          ldx #$45e get keyboard debounce
+6766 17006D           (        gmmut.asm):00706          bsr la1ae
+6769 C6FF             (        gmmut.asm):00707          ldb #$ff set column strobe to all ones (no
+676B 170028           (        gmmut.asm):00708          bsr la238 strobe) and read keyboard
+676E 4C               (        gmmut.asm):00709          inca = incr row data, acca now 0 if no joystick
+676F 10260007         (        gmmut.asm):00710          bne la220 = button down. branch if joystick button down
+6773 E662             (        gmmut.asm):00711         la21a ldb 2,s get column strobe data
+6775 17001E           (        gmmut.asm):00712          bsr la238 read a key
+6778 A161             (        gmmut.asm):00713          cmpa 1,s is it the same key as before debounce?
+677A 3512             (        gmmut.asm):00714         la220 puls a,x remove temp slots from the stack and recover
                       (        gmmut.asm):00715         * the ascii value of the key
-677D 10260009         (        gmmut.asm):00716          bne la22b not the same key or joystick button
-6781 8112             (        gmmut.asm):00717          cmpa #$12 is shift zero down?
-6783 10260004         (        gmmut.asm):00718          bne la22c no
-6787 736716           (        gmmut.asm):00719          com casflg yes, toggle upper case/lower case flag
-678A 4F               (        gmmut.asm):00720         la22b clra set zero flag to indicate no new key down
-678B 35D4             (        gmmut.asm):00721         la22c puls b,x,u,pc restore registers
+677C 10260009         (        gmmut.asm):00716          bne la22b not the same key or joystick button
+6780 8112             (        gmmut.asm):00717          cmpa #$12 is shift zero down?
+6782 10260004         (        gmmut.asm):00718          bne la22c no
+6786 736715           (        gmmut.asm):00719          com casflg yes, toggle upper case/lower case flag
+6789 4F               (        gmmut.asm):00720         la22b clra set zero flag to indicate no new key down
+678A 35D4             (        gmmut.asm):00721         la22c puls b,x,u,pc restore registers
                       (        gmmut.asm):00722         
                       (        gmmut.asm):00723         * test for the shift key
-678D 867F             (        gmmut.asm):00724         la22e lda #$7f column strobe
-678F A742             (        gmmut.asm):00725          sta 2,u store to pla
-6791 A6C4             (        gmmut.asm):00726          lda ,u read key data
-6793 43               (        gmmut.asm):00727          coma *
-6794 8440             (        gmmut.asm):00728          anda #$40 * set bit 6 if shift key down
-6796 39               (        gmmut.asm):00729          rts return
+678C 867F             (        gmmut.asm):00724         la22e lda #$7f column strobe
+678E A742             (        gmmut.asm):00725          sta 2,u store to pla
+6790 A6C4             (        gmmut.asm):00726          lda ,u read key data
+6792 43               (        gmmut.asm):00727          coma *
+6793 8440             (        gmmut.asm):00728          anda #$40 * set bit 6 if shift key down
+6795 39               (        gmmut.asm):00729          rts return
                       (        gmmut.asm):00730         
                       (        gmmut.asm):00731         * read the keyboard
-6797 E742             (        gmmut.asm):00732         la238 stb 2,u save new column strobe value
-6799 A6C4             (        gmmut.asm):00733         la23a lda ,u read pia0, port a to see if key is down
+6796 E742             (        gmmut.asm):00732         la238 stb 2,u save new column strobe value
+6798 A6C4             (        gmmut.asm):00733         la23a lda ,u read pia0, port a to see if key is down
                       (        gmmut.asm):00734         * a bit will be zero if one is
-679B 8A80             (        gmmut.asm):00735          ora #$80 mask off the joystick comparator input
-679D 6D42             (        gmmut.asm):00736          tst $02,u are we strobing column 7?
-679F 102B0002         (        gmmut.asm):00737          bmi la244 no
-67A3 8AC0             (        gmmut.asm):00738          ora #$c0 yes, force row 6 to be high - this will cause
+679A 8A80             (        gmmut.asm):00735          ora #$80 mask off the joystick comparator input
+679C 6D42             (        gmmut.asm):00736          tst $02,u are we strobing column 7?
+679E 102B0002         (        gmmut.asm):00737          bmi la244 no
+67A2 8AC0             (        gmmut.asm):00738          ora #$c0 yes, force row 6 to be high - this will cause
                       (        gmmut.asm):00739         * the shift key to be ignored
-67A5 39               (        gmmut.asm):00740         la244 rts return
+67A4 39               (        gmmut.asm):00740         la244 rts return
                       (        gmmut.asm):00741         
-67A6 C633             (        gmmut.asm):00742         la245 ldb #51 code for ‘at sign’
-67A8 8E67A9           (        gmmut.asm):00743         la247 ldx #contab-$36 point x to control code table
-67AB C121             (        gmmut.asm):00744          cmpb #33 key number <33?
-67AD 1025001A         (        gmmut.asm):00745          blo la264 yes (arrow keys, space bar, zero)
-67B1 8E678B           (        gmmut.asm):00746          ldx #contab-$54 point x to middle of control table
-67B4 C130             (        gmmut.asm):00747          cmpb #48 key number >48?
-67B6 10240011         (        gmmut.asm):00748          bhs la264 yes (enter,clear,break,at sign)
-67BA 8DD1             (        gmmut.asm):00749          bsr la22e check shift key (acca will contain status)
-67BC C12B             (        gmmut.asm):00750          cmpb #43 is key a number, colon or semicolon?
-67BE 10230002         (        gmmut.asm):00751          bls la25d yes
-67C2 8840             (        gmmut.asm):00752          eora #$40 toggle bit 6 of acca which contains the shift data
+67A5 C633             (        gmmut.asm):00742         la245 ldb #51 code for ‘at sign’
+67A7 8E67A8           (        gmmut.asm):00743         la247 ldx #contab-$36 point x to control code table
+67AA C121             (        gmmut.asm):00744          cmpb #33 key number <33?
+67AC 1025001A         (        gmmut.asm):00745          blo la264 yes (arrow keys, space bar, zero)
+67B0 8E678A           (        gmmut.asm):00746          ldx #contab-$54 point x to middle of control table
+67B3 C130             (        gmmut.asm):00747          cmpb #48 key number >48?
+67B5 10240011         (        gmmut.asm):00748          bhs la264 yes (enter,clear,break,at sign)
+67B9 8DD1             (        gmmut.asm):00749          bsr la22e check shift key (acca will contain status)
+67BB C12B             (        gmmut.asm):00750          cmpb #43 is key a number, colon or semicolon?
+67BD 10230002         (        gmmut.asm):00751          bls la25d yes
+67C1 8840             (        gmmut.asm):00752          eora #$40 toggle bit 6 of acca which contains the shift data
                       (        gmmut.asm):00753         * only for slash,hyphen,period,comma
-67C4 4D               (        gmmut.asm):00754         la25d tsta shift key down?
-67C5 269B             (        gmmut.asm):00755          bne la20c yes
-67C7 CB10             (        gmmut.asm):00756          addb #$10 no, add in ascii offset correction
-67C9 2097             (        gmmut.asm):00757          bra la20c go check for debounce
-67CB 58               (        gmmut.asm):00758         la264 aslb mult accb by 2 - there are 2 entries in control
+67C3 4D               (        gmmut.asm):00754         la25d tsta shift key down?
+67C4 269B             (        gmmut.asm):00755          bne la20c yes
+67C6 CB10             (        gmmut.asm):00756          addb #$10 no, add in ascii offset correction
+67C8 2097             (        gmmut.asm):00757          bra la20c go check for debounce
+67CA 58               (        gmmut.asm):00758         la264 aslb mult accb by 2 - there are 2 entries in control
                       (        gmmut.asm):00759         * table for each key - one shifted, one not
-67CC 8DBF             (        gmmut.asm):00760          bsr la22e check shift key
-67CE 10270001         (        gmmut.asm):00761          beq la26a not down
-67D2 5C               (        gmmut.asm):00762          incb add one to get the shifted value
-67D3 E685             (        gmmut.asm):00763         la26a ldb b,x get ascii code from control table
-67D5 208B             (        gmmut.asm):00764          bra la20c go check debounce
-67D7 7E67DA           (        gmmut.asm):00765         la1ae jmp la7d3 delay while x decrements to zero
+67CB 8DBF             (        gmmut.asm):00760          bsr la22e check shift key
+67CD 10270001         (        gmmut.asm):00761          beq la26a not down
+67D1 5C               (        gmmut.asm):00762          incb add one to get the shifted value
+67D2 E685             (        gmmut.asm):00763         la26a ldb b,x get ascii code from control table
+67D4 208B             (        gmmut.asm):00764          bra la20c go check debounce
+67D6 7E67D9           (        gmmut.asm):00765         la1ae jmp la7d3 delay while x decrements to zero
                       (        gmmut.asm):00766         * delay while decrementing x to zero
-67DA 301F             (        gmmut.asm):00767         la7d3 leax -1,x decrement x
-67DC 26FC             (        gmmut.asm):00768          bne la7d3 branch if not zero
-67DE 39               (        gmmut.asm):00769          rts
+67D9 301F             (        gmmut.asm):00767         la7d3 leax -1,x decrement x
+67DB 26FC             (        gmmut.asm):00768          bne la7d3 branch if not zero
+67DD 39               (        gmmut.asm):00769          rts
                       (        gmmut.asm):00770         *
                       (        gmmut.asm):00771         *
                       (        gmmut.asm):00772         * control table unshifted, shifted values
-67DF 5E5F             (        gmmut.asm):00773         contab fcb $5e,$5f up arrow
-67E1 0A5B             (        gmmut.asm):00774          fcb $0a,$5b down arrow
-67E3 0815             (        gmmut.asm):00775          fcb $08,$15 right arrow
-67E5 095D             (        gmmut.asm):00776          fcb $09,$5d left arrow
-67E7 2020             (        gmmut.asm):00777          fcb $20,$20 space bar
-67E9 3012             (        gmmut.asm):00778          fcb $30,$12 zero
-67EB 0D0D             (        gmmut.asm):00779          fcb $0d,$0d enter
-67ED 0C5C             (        gmmut.asm):00780          fcb $0c,$5c clear
-67EF 0303             (        gmmut.asm):00781          fcb $03,$03 break
-67F1 4013             (        gmmut.asm):00782          fcb $40,$13 at sign
+67DE 5E5F             (        gmmut.asm):00773         contab fcb $5e,$5f up arrow
+67E0 0A5B             (        gmmut.asm):00774          fcb $0a,$5b down arrow
+67E2 0815             (        gmmut.asm):00775          fcb $08,$15 right arrow
+67E4 095D             (        gmmut.asm):00776          fcb $09,$5d left arrow
+67E6 2020             (        gmmut.asm):00777          fcb $20,$20 space bar
+67E8 3012             (        gmmut.asm):00778          fcb $30,$12 zero
+67EA 0D0D             (        gmmut.asm):00779          fcb $0d,$0d enter
+67EC 0C5C             (        gmmut.asm):00780          fcb $0c,$5c clear
+67EE 0303             (        gmmut.asm):00781          fcb $03,$03 break
+67F0 4013             (        gmmut.asm):00782          fcb $40,$13 at sign
                       (        gmmut.asm):00783         
                       (        gmmut.asm):00784         
                       (        gmmut.asm):00785         
                       (        gmmut.asm):00786         
-67F3                  (        gmmut.asm):00787         buffer rmb 256
-68F3                  (        gmmut.asm):00788         buffer2 rmb 256
-69F3                  (        gmmut.asm):00789         bitmap_font
-69F3 FFFFFFFFFFFFFFFF (        gmmut.asm):00790          fcb $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff ( )
-69FB E7C3C3E7E7FFE7FF (        gmmut.asm):00791          fcb $e7,$c3,$c3,$e7,$e7,$ff,$e7,$ff (!)
-6A03 9393FFFFFFFFFFFF (        gmmut.asm):00792          fcb $93,$93,$ff,$ff,$ff,$ff,$ff,$ff (")
-6A0B 93930193019393FF (        gmmut.asm):00793          fcb $93,$93,$01,$93,$01,$93,$93,$ff (#)
-6A13 CF833F87F307CFFF (        gmmut.asm):00794          fcb $cf,$83,$3f,$87,$f3,$07,$cf,$ff ($)
-6A1B FF3933E7CF9939FF (        gmmut.asm):00795          fcb $ff,$39,$33,$e7,$cf,$99,$39,$ff (%)
-6A23 C793C789233389FF (        gmmut.asm):00796          fcb $c7,$93,$c7,$89,$23,$33,$89,$ff (&)
-6A2B 9F9F3FFFFFFFFFFF (        gmmut.asm):00797          fcb $9f,$9f,$3f,$ff,$ff,$ff,$ff,$ff (')
-6A33 E7CF9F9F9FCFE7FF (        gmmut.asm):00798          fcb $e7,$cf,$9f,$9f,$9f,$cf,$e7,$ff (()
-6A3B 9FCFE7E7E7CF9FFF (        gmmut.asm):00799          fcb $9f,$cf,$e7,$e7,$e7,$cf,$9f,$ff ())
-6A43 FF99C300C399FFFF (        gmmut.asm):00800          fcb $ff,$99,$c3,$00,$c3,$99,$ff,$ff (*)
-6A4B FFCFCF03CFCFFFFF (        gmmut.asm):00801          fcb $ff,$cf,$cf,$03,$cf,$cf,$ff,$ff (+)
-6A53 FFFFFFFFFFCFCF9F (        gmmut.asm):00802          fcb $ff,$ff,$ff,$ff,$ff,$cf,$cf,$9f (,)
-6A5B FFFFFF03FFFFFFFF (        gmmut.asm):00803          fcb $ff,$ff,$ff,$03,$ff,$ff,$ff,$ff (-)
-6A63 FFFFFFFFFFCFCFFF (        gmmut.asm):00804          fcb $ff,$ff,$ff,$ff,$ff,$cf,$cf,$ff (.)
-6A6B F9F3E7CF9F3F7FFF (        gmmut.asm):00805          fcb $f9,$f3,$e7,$cf,$9f,$3f,$7f,$ff (/)
-6A73 83393121091983FF (        gmmut.asm):00806          fcb $83,$39,$31,$21,$09,$19,$83,$ff (0)
-6A7B CF8FCFCFCFCF03FF (        gmmut.asm):00807          fcb $cf,$8f,$cf,$cf,$cf,$cf,$03,$ff (1)
-6A83 8733F3C79F3303FF (        gmmut.asm):00808          fcb $87,$33,$f3,$c7,$9f,$33,$03,$ff (2)
-6A8B 8733F3C7F33387FF (        gmmut.asm):00809          fcb $87,$33,$f3,$c7,$f3,$33,$87,$ff (3)
-6A93 E3C3933301F3E1FF (        gmmut.asm):00810          fcb $e3,$c3,$93,$33,$01,$f3,$e1,$ff (4)
-6A9B 033F07F3F33387FF (        gmmut.asm):00811          fcb $03,$3f,$07,$f3,$f3,$33,$87,$ff (5)
-6AA3 C79F3F07333387FF (        gmmut.asm):00812          fcb $c7,$9f,$3f,$07,$33,$33,$87,$ff (6)
-6AAB 0333F3E7CFCFCFFF (        gmmut.asm):00813          fcb $03,$33,$f3,$e7,$cf,$cf,$cf,$ff (7)
-6AB3 87333387333387FF (        gmmut.asm):00814          fcb $87,$33,$33,$87,$33,$33,$87,$ff (8)
-6ABB 87333383F3E78FFF (        gmmut.asm):00815          fcb $87,$33,$33,$83,$f3,$e7,$8f,$ff (9)
-6AC3 FFCFCFFFFFCFCFFF (        gmmut.asm):00816          fcb $ff,$cf,$cf,$ff,$ff,$cf,$cf,$ff (:)
-6ACB FFCFCFFFFFCFCF9F (        gmmut.asm):00817          fcb $ff,$cf,$cf,$ff,$ff,$cf,$cf,$9f (;)
-6AD3 E7CF9F3F9FCFE7FF (        gmmut.asm):00818          fcb $e7,$cf,$9f,$3f,$9f,$cf,$e7,$ff (<)
-6ADB FFFF03FFFF03FFFF (        gmmut.asm):00819          fcb $ff,$ff,$03,$ff,$ff,$03,$ff,$ff (=)
-6AE3 9FCFE7F3E7CF9FFF (        gmmut.asm):00820          fcb $9f,$cf,$e7,$f3,$e7,$cf,$9f,$ff (>)
-6AEB 8733F3E7CFFFCFFF (        gmmut.asm):00821          fcb $87,$33,$f3,$e7,$cf,$ff,$cf,$ff (?)
-6AF3 83392121213F87FF (        gmmut.asm):00822          fcb $83,$39,$21,$21,$21,$3f,$87,$ff (@)
-6AFB CF873333033333FF (        gmmut.asm):00823          fcb $cf,$87,$33,$33,$03,$33,$33,$ff (A)
-6B03 03999983999903FF (        gmmut.asm):00824          fcb $03,$99,$99,$83,$99,$99,$03,$ff (B)
-6B0B C3993F3F3F99C3FF (        gmmut.asm):00825          fcb $c3,$99,$3f,$3f,$3f,$99,$c3,$ff (C)
-6B13 07939999999307FF (        gmmut.asm):00826          fcb $07,$93,$99,$99,$99,$93,$07,$ff (D)
-6B1B 019D9787979D01FF (        gmmut.asm):00827          fcb $01,$9d,$97,$87,$97,$9d,$01,$ff (E)
-6B23 019D9787979F0FFF (        gmmut.asm):00828          fcb $01,$9d,$97,$87,$97,$9f,$0f,$ff (F)
-6B2B C3993F3F3199C1FF (        gmmut.asm):00829          fcb $c3,$99,$3f,$3f,$31,$99,$c1,$ff (G)
-6B33 33333303333333FF (        gmmut.asm):00830          fcb $33,$33,$33,$03,$33,$33,$33,$ff (H)
-6B3B 87CFCFCFCFCF87FF (        gmmut.asm):00831          fcb $87,$cf,$cf,$cf,$cf,$cf,$87,$ff (I)
-6B43 E1F3F3F3333387FF (        gmmut.asm):00832          fcb $e1,$f3,$f3,$f3,$33,$33,$87,$ff (J)
-6B4B 19999387939919FF (        gmmut.asm):00833          fcb $19,$99,$93,$87,$93,$99,$19,$ff (K)
-6B53 0F9F9F9F9D9901FF (        gmmut.asm):00834          fcb $0f,$9f,$9f,$9f,$9d,$99,$01,$ff (L)
-6B5B 39110101293939FF (        gmmut.asm):00835          fcb $39,$11,$01,$01,$29,$39,$39,$ff (M)
-6B63 39190921313939FF (        gmmut.asm):00836          fcb $39,$19,$09,$21,$31,$39,$39,$ff (N)
-6B6B C79339393993C7FF (        gmmut.asm):00837          fcb $c7,$93,$39,$39,$39,$93,$c7,$ff (O)
-6B73 039999839F9F0FFF (        gmmut.asm):00838          fcb $03,$99,$99,$83,$9f,$9f,$0f,$ff (P)
-6B7B 873333332387E3FF (        gmmut.asm):00839          fcb $87,$33,$33,$33,$23,$87,$e3,$ff (Q)
-6B83 03999983939919FF (        gmmut.asm):00840          fcb $03,$99,$99,$83,$93,$99,$19,$ff (R)
-6B8B 87331F8FE33387FF (        gmmut.asm):00841          fcb $87,$33,$1f,$8f,$e3,$33,$87,$ff (S)
-6B93 034BCFCFCFCF87FF (        gmmut.asm):00842          fcb $03,$4b,$cf,$cf,$cf,$cf,$87,$ff (T)
-6B9B 33333333333303FF (        gmmut.asm):00843          fcb $33,$33,$33,$33,$33,$33,$03,$ff (U)
-6BA3 333333333387CFFF (        gmmut.asm):00844          fcb $33,$33,$33,$33,$33,$87,$cf,$ff (V)
-6BAB 39393929011139FF (        gmmut.asm):00845          fcb $39,$39,$39,$29,$01,$11,$39,$ff (W)
-6BB3 393993C7C79339FF (        gmmut.asm):00846          fcb $39,$39,$93,$c7,$c7,$93,$39,$ff (X)
-6BBB 33333387CFCF87FF (        gmmut.asm):00847          fcb $33,$33,$33,$87,$cf,$cf,$87,$ff (Y)
-6BC3 013973E7CD9901FF (        gmmut.asm):00848          fcb $01,$39,$73,$e7,$cd,$99,$01,$ff (Z)
-6BCB 879F9F9F9F9F87FF (        gmmut.asm):00849          fcb $87,$9f,$9f,$9f,$9f,$9f,$87,$ff ([)
-6BD3 3F9FCFE7F3F9FDFF (        gmmut.asm):00850          fcb $3f,$9f,$cf,$e7,$f3,$f9,$fd,$ff (\)
-6BDB 87E7E7E7E7E787FF (        gmmut.asm):00851          fcb $87,$e7,$e7,$e7,$e7,$e7,$87,$ff (])
-6BE3 EFC79339FFFFFFFF (        gmmut.asm):00852          fcb $ef,$c7,$93,$39,$ff,$ff,$ff,$ff (^)
-6BEB FFFFFFFFFFFFFF00 (        gmmut.asm):00853          fcb $ff,$ff,$ff,$ff,$ff,$ff,$ff,$00 (_)
-6BF3 CFCFE7FFFFFFFFFF (        gmmut.asm):00854          fcb $cf,$cf,$e7,$ff,$ff,$ff,$ff,$ff (`)
-6BFB FFFF87F3833389FF (        gmmut.asm):00855          fcb $ff,$ff,$87,$f3,$83,$33,$89,$ff (a)
-6C03 1F9F9F83999923FF (        gmmut.asm):00856          fcb $1f,$9f,$9f,$83,$99,$99,$23,$ff (b)
-6C0B FFFF87333F3387FF (        gmmut.asm):00857          fcb $ff,$ff,$87,$33,$3f,$33,$87,$ff (c)
-6C13 E3F3F383333389FF (        gmmut.asm):00858          fcb $e3,$f3,$f3,$83,$33,$33,$89,$ff (d)
-6C1B FFFF8733033F87FF (        gmmut.asm):00859          fcb $ff,$ff,$87,$33,$03,$3f,$87,$ff (e)
-6C23 C7939F0F9F9F0FFF (        gmmut.asm):00860          fcb $c7,$93,$9f,$0f,$9f,$9f,$0f,$ff (f)
-6C2B FFFF89333383F307 (        gmmut.asm):00861          fcb $ff,$ff,$89,$33,$33,$83,$f3,$07 (g)
-6C33 1F9F9389999919FF (        gmmut.asm):00862          fcb $1f,$9f,$93,$89,$99,$99,$19,$ff (h)
-6C3B CFFF8FCFCFCF87FF (        gmmut.asm):00863          fcb $cf,$ff,$8f,$cf,$cf,$cf,$87,$ff (i)
-6C43 F3FFF3F3F3333387 (        gmmut.asm):00864          fcb $f3,$ff,$f3,$f3,$f3,$33,$33,$87 (j)
-6C4B 1F9F9993879319FF (        gmmut.asm):00865          fcb $1f,$9f,$99,$93,$87,$93,$19,$ff (k)
-6C53 8FCFCFCFCFCF87FF (        gmmut.asm):00866          fcb $8f,$cf,$cf,$cf,$cf,$cf,$87,$ff (l)
-6C5B FFFF3301012939FF (        gmmut.asm):00867          fcb $ff,$ff,$33,$01,$01,$29,$39,$ff (m)
-6C63 FFFF0733333333FF (        gmmut.asm):00868          fcb $ff,$ff,$07,$33,$33,$33,$33,$ff (n)
-6C6B FFFF8733333387FF (        gmmut.asm):00869          fcb $ff,$ff,$87,$33,$33,$33,$87,$ff (o)
-6C73 FFFF239999839F0F (        gmmut.asm):00870          fcb $ff,$ff,$23,$99,$99,$83,$9f,$0f (p)
-6C7B FFFF89333383F3E1 (        gmmut.asm):00871          fcb $ff,$ff,$89,$33,$33,$83,$f3,$e1 (q)
-6C83 FFFF2389999F0FFF (        gmmut.asm):00872          fcb $ff,$ff,$23,$89,$99,$9f,$0f,$ff (r)
-6C8B FFFF833F87F307FF (        gmmut.asm):00873          fcb $ff,$ff,$83,$3f,$87,$f3,$07,$ff (s)
-6C93 EFCF83CFCFCBE7FF (        gmmut.asm):00874          fcb $ef,$cf,$83,$cf,$cf,$cb,$e7,$ff (t)
-6C9B FFFF3333333389FF (        gmmut.asm):00875          fcb $ff,$ff,$33,$33,$33,$33,$89,$ff (u)
-6CA3 FFFF33333387CFFF (        gmmut.asm):00876          fcb $ff,$ff,$33,$33,$33,$87,$cf,$ff (v)
-6CAB FFFF3929010193FF (        gmmut.asm):00877          fcb $ff,$ff,$39,$29,$01,$01,$93,$ff (w)
-6CB3 FFFF3993C79339FF (        gmmut.asm):00878          fcb $ff,$ff,$39,$93,$c7,$93,$39,$ff (x)
-6CBB FFFF33333383F307 (        gmmut.asm):00879          fcb $ff,$ff,$33,$33,$33,$83,$f3,$07 (y)
-6CC3 FFFF0367CF9B03FF (        gmmut.asm):00880          fcb $ff,$ff,$03,$67,$cf,$9b,$03,$ff (z)
-6CCB E3CFCF1FCFCFE3FF (        gmmut.asm):00881          fcb $e3,$cf,$cf,$1f,$cf,$cf,$e3,$ff ({)
-6CD3 E7E7E7FFE7E7E7FF (        gmmut.asm):00882          fcb $e7,$e7,$e7,$ff,$e7,$e7,$e7,$ff (|)
-6CDB 1FCFCFE3CFCF1FFF (        gmmut.asm):00883          fcb $1f,$cf,$cf,$e3,$cf,$cf,$1f,$ff (})
-6CE3 8923FFFFFFFFFFFF (        gmmut.asm):00884          fcb $89,$23,$ff,$ff,$ff,$ff,$ff,$ff (~)
-6CEB FFFFFFFFFFFFFFFF (        gmmut.asm):00885          fcb $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff ( )
+67F2                  (        gmmut.asm):00787         buffer rmb 256
+68F2                  (        gmmut.asm):00788         buffer2 rmb 256
+69F2                  (        gmmut.asm):00789         bitmap_font
+69F2 FFFFFFFFFFFFFFFF (        gmmut.asm):00790          fcb $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff ( )
+69FA E7C3C3E7E7FFE7FF (        gmmut.asm):00791          fcb $e7,$c3,$c3,$e7,$e7,$ff,$e7,$ff (!)
+6A02 9393FFFFFFFFFFFF (        gmmut.asm):00792          fcb $93,$93,$ff,$ff,$ff,$ff,$ff,$ff (")
+6A0A 93930193019393FF (        gmmut.asm):00793          fcb $93,$93,$01,$93,$01,$93,$93,$ff (#)
+6A12 CF833F87F307CFFF (        gmmut.asm):00794          fcb $cf,$83,$3f,$87,$f3,$07,$cf,$ff ($)
+6A1A FF3933E7CF9939FF (        gmmut.asm):00795          fcb $ff,$39,$33,$e7,$cf,$99,$39,$ff (%)
+6A22 C793C789233389FF (        gmmut.asm):00796          fcb $c7,$93,$c7,$89,$23,$33,$89,$ff (&)
+6A2A 9F9F3FFFFFFFFFFF (        gmmut.asm):00797          fcb $9f,$9f,$3f,$ff,$ff,$ff,$ff,$ff (')
+6A32 E7CF9F9F9FCFE7FF (        gmmut.asm):00798          fcb $e7,$cf,$9f,$9f,$9f,$cf,$e7,$ff (()
+6A3A 9FCFE7E7E7CF9FFF (        gmmut.asm):00799          fcb $9f,$cf,$e7,$e7,$e7,$cf,$9f,$ff ())
+6A42 FF99C300C399FFFF (        gmmut.asm):00800          fcb $ff,$99,$c3,$00,$c3,$99,$ff,$ff (*)
+6A4A FFCFCF03CFCFFFFF (        gmmut.asm):00801          fcb $ff,$cf,$cf,$03,$cf,$cf,$ff,$ff (+)
+6A52 FFFFFFFFFFCFCF9F (        gmmut.asm):00802          fcb $ff,$ff,$ff,$ff,$ff,$cf,$cf,$9f (,)
+6A5A FFFFFF03FFFFFFFF (        gmmut.asm):00803          fcb $ff,$ff,$ff,$03,$ff,$ff,$ff,$ff (-)
+6A62 FFFFFFFFFFCFCFFF (        gmmut.asm):00804          fcb $ff,$ff,$ff,$ff,$ff,$cf,$cf,$ff (.)
+6A6A F9F3E7CF9F3F7FFF (        gmmut.asm):00805          fcb $f9,$f3,$e7,$cf,$9f,$3f,$7f,$ff (/)
+6A72 83393121091983FF (        gmmut.asm):00806          fcb $83,$39,$31,$21,$09,$19,$83,$ff (0)
+6A7A CF8FCFCFCFCF03FF (        gmmut.asm):00807          fcb $cf,$8f,$cf,$cf,$cf,$cf,$03,$ff (1)
+6A82 8733F3C79F3303FF (        gmmut.asm):00808          fcb $87,$33,$f3,$c7,$9f,$33,$03,$ff (2)
+6A8A 8733F3C7F33387FF (        gmmut.asm):00809          fcb $87,$33,$f3,$c7,$f3,$33,$87,$ff (3)
+6A92 E3C3933301F3E1FF (        gmmut.asm):00810          fcb $e3,$c3,$93,$33,$01,$f3,$e1,$ff (4)
+6A9A 033F07F3F33387FF (        gmmut.asm):00811          fcb $03,$3f,$07,$f3,$f3,$33,$87,$ff (5)
+6AA2 C79F3F07333387FF (        gmmut.asm):00812          fcb $c7,$9f,$3f,$07,$33,$33,$87,$ff (6)
+6AAA 0333F3E7CFCFCFFF (        gmmut.asm):00813          fcb $03,$33,$f3,$e7,$cf,$cf,$cf,$ff (7)
+6AB2 87333387333387FF (        gmmut.asm):00814          fcb $87,$33,$33,$87,$33,$33,$87,$ff (8)
+6ABA 87333383F3E78FFF (        gmmut.asm):00815          fcb $87,$33,$33,$83,$f3,$e7,$8f,$ff (9)
+6AC2 FFCFCFFFFFCFCFFF (        gmmut.asm):00816          fcb $ff,$cf,$cf,$ff,$ff,$cf,$cf,$ff (:)
+6ACA FFCFCFFFFFCFCF9F (        gmmut.asm):00817          fcb $ff,$cf,$cf,$ff,$ff,$cf,$cf,$9f (;)
+6AD2 E7CF9F3F9FCFE7FF (        gmmut.asm):00818          fcb $e7,$cf,$9f,$3f,$9f,$cf,$e7,$ff (<)
+6ADA FFFF03FFFF03FFFF (        gmmut.asm):00819          fcb $ff,$ff,$03,$ff,$ff,$03,$ff,$ff (=)
+6AE2 9FCFE7F3E7CF9FFF (        gmmut.asm):00820          fcb $9f,$cf,$e7,$f3,$e7,$cf,$9f,$ff (>)
+6AEA 8733F3E7CFFFCFFF (        gmmut.asm):00821          fcb $87,$33,$f3,$e7,$cf,$ff,$cf,$ff (?)
+6AF2 83392121213F87FF (        gmmut.asm):00822          fcb $83,$39,$21,$21,$21,$3f,$87,$ff (@)
+6AFA CF873333033333FF (        gmmut.asm):00823          fcb $cf,$87,$33,$33,$03,$33,$33,$ff (A)
+6B02 03999983999903FF (        gmmut.asm):00824          fcb $03,$99,$99,$83,$99,$99,$03,$ff (B)
+6B0A C3993F3F3F99C3FF (        gmmut.asm):00825          fcb $c3,$99,$3f,$3f,$3f,$99,$c3,$ff (C)
+6B12 07939999999307FF (        gmmut.asm):00826          fcb $07,$93,$99,$99,$99,$93,$07,$ff (D)
+6B1A 019D9787979D01FF (        gmmut.asm):00827          fcb $01,$9d,$97,$87,$97,$9d,$01,$ff (E)
+6B22 019D9787979F0FFF (        gmmut.asm):00828          fcb $01,$9d,$97,$87,$97,$9f,$0f,$ff (F)
+6B2A C3993F3F3199C1FF (        gmmut.asm):00829          fcb $c3,$99,$3f,$3f,$31,$99,$c1,$ff (G)
+6B32 33333303333333FF (        gmmut.asm):00830          fcb $33,$33,$33,$03,$33,$33,$33,$ff (H)
+6B3A 87CFCFCFCFCF87FF (        gmmut.asm):00831          fcb $87,$cf,$cf,$cf,$cf,$cf,$87,$ff (I)
+6B42 E1F3F3F3333387FF (        gmmut.asm):00832          fcb $e1,$f3,$f3,$f3,$33,$33,$87,$ff (J)
+6B4A 19999387939919FF (        gmmut.asm):00833          fcb $19,$99,$93,$87,$93,$99,$19,$ff (K)
+6B52 0F9F9F9F9D9901FF (        gmmut.asm):00834          fcb $0f,$9f,$9f,$9f,$9d,$99,$01,$ff (L)
+6B5A 39110101293939FF (        gmmut.asm):00835          fcb $39,$11,$01,$01,$29,$39,$39,$ff (M)
+6B62 39190921313939FF (        gmmut.asm):00836          fcb $39,$19,$09,$21,$31,$39,$39,$ff (N)
+6B6A C79339393993C7FF (        gmmut.asm):00837          fcb $c7,$93,$39,$39,$39,$93,$c7,$ff (O)
+6B72 039999839F9F0FFF (        gmmut.asm):00838          fcb $03,$99,$99,$83,$9f,$9f,$0f,$ff (P)
+6B7A 873333332387E3FF (        gmmut.asm):00839          fcb $87,$33,$33,$33,$23,$87,$e3,$ff (Q)
+6B82 03999983939919FF (        gmmut.asm):00840          fcb $03,$99,$99,$83,$93,$99,$19,$ff (R)
+6B8A 87331F8FE33387FF (        gmmut.asm):00841          fcb $87,$33,$1f,$8f,$e3,$33,$87,$ff (S)
+6B92 034BCFCFCFCF87FF (        gmmut.asm):00842          fcb $03,$4b,$cf,$cf,$cf,$cf,$87,$ff (T)
+6B9A 33333333333303FF (        gmmut.asm):00843          fcb $33,$33,$33,$33,$33,$33,$03,$ff (U)
+6BA2 333333333387CFFF (        gmmut.asm):00844          fcb $33,$33,$33,$33,$33,$87,$cf,$ff (V)
+6BAA 39393929011139FF (        gmmut.asm):00845          fcb $39,$39,$39,$29,$01,$11,$39,$ff (W)
+6BB2 393993C7C79339FF (        gmmut.asm):00846          fcb $39,$39,$93,$c7,$c7,$93,$39,$ff (X)
+6BBA 33333387CFCF87FF (        gmmut.asm):00847          fcb $33,$33,$33,$87,$cf,$cf,$87,$ff (Y)
+6BC2 013973E7CD9901FF (        gmmut.asm):00848          fcb $01,$39,$73,$e7,$cd,$99,$01,$ff (Z)
+6BCA 879F9F9F9F9F87FF (        gmmut.asm):00849          fcb $87,$9f,$9f,$9f,$9f,$9f,$87,$ff ([)
+6BD2 3F9FCFE7F3F9FDFF (        gmmut.asm):00850          fcb $3f,$9f,$cf,$e7,$f3,$f9,$fd,$ff (\)
+6BDA 87E7E7E7E7E787FF (        gmmut.asm):00851          fcb $87,$e7,$e7,$e7,$e7,$e7,$87,$ff (])
+6BE2 EFC79339FFFFFFFF (        gmmut.asm):00852          fcb $ef,$c7,$93,$39,$ff,$ff,$ff,$ff (^)
+6BEA FFFFFFFFFFFFFF00 (        gmmut.asm):00853          fcb $ff,$ff,$ff,$ff,$ff,$ff,$ff,$00 (_)
+6BF2 CFCFE7FFFFFFFFFF (        gmmut.asm):00854          fcb $cf,$cf,$e7,$ff,$ff,$ff,$ff,$ff (`)
+6BFA FFFF87F3833389FF (        gmmut.asm):00855          fcb $ff,$ff,$87,$f3,$83,$33,$89,$ff (a)
+6C02 1F9F9F83999923FF (        gmmut.asm):00856          fcb $1f,$9f,$9f,$83,$99,$99,$23,$ff (b)
+6C0A FFFF87333F3387FF (        gmmut.asm):00857          fcb $ff,$ff,$87,$33,$3f,$33,$87,$ff (c)
+6C12 E3F3F383333389FF (        gmmut.asm):00858          fcb $e3,$f3,$f3,$83,$33,$33,$89,$ff (d)
+6C1A FFFF8733033F87FF (        gmmut.asm):00859          fcb $ff,$ff,$87,$33,$03,$3f,$87,$ff (e)
+6C22 C7939F0F9F9F0FFF (        gmmut.asm):00860          fcb $c7,$93,$9f,$0f,$9f,$9f,$0f,$ff (f)
+6C2A FFFF89333383F307 (        gmmut.asm):00861          fcb $ff,$ff,$89,$33,$33,$83,$f3,$07 (g)
+6C32 1F9F9389999919FF (        gmmut.asm):00862          fcb $1f,$9f,$93,$89,$99,$99,$19,$ff (h)
+6C3A CFFF8FCFCFCF87FF (        gmmut.asm):00863          fcb $cf,$ff,$8f,$cf,$cf,$cf,$87,$ff (i)
+6C42 F3FFF3F3F3333387 (        gmmut.asm):00864          fcb $f3,$ff,$f3,$f3,$f3,$33,$33,$87 (j)
+6C4A 1F9F9993879319FF (        gmmut.asm):00865          fcb $1f,$9f,$99,$93,$87,$93,$19,$ff (k)
+6C52 8FCFCFCFCFCF87FF (        gmmut.asm):00866          fcb $8f,$cf,$cf,$cf,$cf,$cf,$87,$ff (l)
+6C5A FFFF3301012939FF (        gmmut.asm):00867          fcb $ff,$ff,$33,$01,$01,$29,$39,$ff (m)
+6C62 FFFF0733333333FF (        gmmut.asm):00868          fcb $ff,$ff,$07,$33,$33,$33,$33,$ff (n)
+6C6A FFFF8733333387FF (        gmmut.asm):00869          fcb $ff,$ff,$87,$33,$33,$33,$87,$ff (o)
+6C72 FFFF239999839F0F (        gmmut.asm):00870          fcb $ff,$ff,$23,$99,$99,$83,$9f,$0f (p)
+6C7A FFFF89333383F3E1 (        gmmut.asm):00871          fcb $ff,$ff,$89,$33,$33,$83,$f3,$e1 (q)
+6C82 FFFF2389999F0FFF (        gmmut.asm):00872          fcb $ff,$ff,$23,$89,$99,$9f,$0f,$ff (r)
+6C8A FFFF833F87F307FF (        gmmut.asm):00873          fcb $ff,$ff,$83,$3f,$87,$f3,$07,$ff (s)
+6C92 EFCF83CFCFCBE7FF (        gmmut.asm):00874          fcb $ef,$cf,$83,$cf,$cf,$cb,$e7,$ff (t)
+6C9A FFFF3333333389FF (        gmmut.asm):00875          fcb $ff,$ff,$33,$33,$33,$33,$89,$ff (u)
+6CA2 FFFF33333387CFFF (        gmmut.asm):00876          fcb $ff,$ff,$33,$33,$33,$87,$cf,$ff (v)
+6CAA FFFF3929010193FF (        gmmut.asm):00877          fcb $ff,$ff,$39,$29,$01,$01,$93,$ff (w)
+6CB2 FFFF3993C79339FF (        gmmut.asm):00878          fcb $ff,$ff,$39,$93,$c7,$93,$39,$ff (x)
+6CBA FFFF33333383F307 (        gmmut.asm):00879          fcb $ff,$ff,$33,$33,$33,$83,$f3,$07 (y)
+6CC2 FFFF0367CF9B03FF (        gmmut.asm):00880          fcb $ff,$ff,$03,$67,$cf,$9b,$03,$ff (z)
+6CCA E3CFCF1FCFCFE3FF (        gmmut.asm):00881          fcb $e3,$cf,$cf,$1f,$cf,$cf,$e3,$ff ({)
+6CD2 E7E7E7FFE7E7E7FF (        gmmut.asm):00882          fcb $e7,$e7,$e7,$ff,$e7,$e7,$e7,$ff (|)
+6CDA 1FCFCFE3CFCF1FFF (        gmmut.asm):00883          fcb $1f,$cf,$cf,$e3,$cf,$cf,$1f,$ff (})
+6CE2 8923FFFFFFFFFFFF (        gmmut.asm):00884          fcb $89,$23,$ff,$ff,$ff,$ff,$ff,$ff (~)
+6CEA FFFFFFFFFFFFFFFF (        gmmut.asm):00885          fcb $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff ( )
                       (        gmmut.asm):00886          
                       (        gmmut.asm):00887          IFGT *-$7fff
                       (        gmmut.asm):00888          ERROR "Program to large"
