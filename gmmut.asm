@@ -132,10 +132,7 @@ done_after
 mm_done
  bsr strout
  fcn "PRESS ANY KEY TO CONTINUE\r"
-mm_wait
- bsr keyin
- cmpa #0
- beq mm_wait
+ bsr wait
  puls b
  jmp main_menu
 
@@ -250,9 +247,7 @@ vdg_wrap
  fcn "\rPRESS ANY KEY TO CONTINUE\r\r"
 
 vw_wait
- bsr keyin
- cmpa #0
- beq vw_wait
+ bsr wait
 
 # Set Sam to PMODE 4
  lda #%11110000
@@ -307,10 +302,7 @@ vw_wait
  fdb $2000
  fcn "Page: 08, Offset: 0000 "
 
-dp_wait
- bsr keyin
- cmpa #0
- beq dp_wait
+ bsr wait
 
  bsr restore_task_0
 # Set Sam to text mode
@@ -651,6 +643,17 @@ co_clear_last_line_loop
  std text_position
  rts
 
+wait
+#
+# subroutine
+# output to text screen
+#
+wait_loop
+ jsr keyin
+ cmpa #0
+ beq wait_loop
+ rts
+ 
 pia0 equ $ff00
 keybuf rmb 8 keyboard memory buffer
 casflg rmb 1 upper case/lower case flag: $ff=upper, 0=lower
