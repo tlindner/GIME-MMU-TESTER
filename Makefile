@@ -1,12 +1,12 @@
 
 DEPENDS		= ./Makefile
 
-AS		= lwasm -r --pragma=condundefzero
+AS			= lwasm -r --pragma=condundefzero
 ASOUT		= -o
 ECHO		= echo
 
 BINS		= gmmut.bin
-DSKS            = gmmut.dsk
+DSKS		= gmmut.dsk
 
 all:	banner bin dsk $(DEPENDS)
 
@@ -24,7 +24,7 @@ dsk:	bin
 	decb copy -r -2 gmmut.bin gmmut.dsk,GMMUT.BIN
 
 bin:	gmmut.asm
-	$(AS) $(ASOUT)gmmut.bin gmmut.asm $(AFLAGS) --decb
+	$(AS) $(ASOUT)gmmut.bin gmmut.asm $(AFLAGS) --list=gmmut.lst --decb
 
 clean:
 	-rm $(BINS) $(DSKS)

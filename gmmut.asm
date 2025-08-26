@@ -1,6 +1,6 @@
  PRAGMA autobranchlength
  PRAGMA cescapes
- org $6000
+ org $6001
 out_param rmb 1
 gime_flag rmb 1 # boolean; true if gime, false if jr
 text_block rmb 1 # mmu block of text screen
@@ -210,28 +210,35 @@ report_count_mmu
  beq rc_2048k
  bsr strout
  fcn "UNKNOWN RAM AMOUNT\r"
- rts
+ bra rc_printTable
 rc_128k
  bsr strout
  fcn "128K - $30 TO $3F\r"
- rts
+ bra rc_printTable
 rc_256k
  bsr strout
  fcn "256K - $20 TO $3F\r"
- rts
+ bra rc_printTable
 rc_512k
  bsr strout
  fcn "512K - $00 TO $3F\r"
- rts
+ bra rc_printTable
 rc_1024k
  bsr strout
  fcn "1024K - $00 TO $7F\r"
- rts
+ bra rc_printTable
 rc_2048k
  bsr strout
  fcn "2048K - $00 TO $FF\r"
+rc_printTable
+ bsr strout
+ fcn "FIRST BYTE OF TABLE: "
+ lda buffer
+ jsr charout_hex
+ bsr strout
+ fcn "\r"
  rts
-
+ 
 vdg_wrap
  bsr save_task_0
 # explain what is going to happen
@@ -572,7 +579,25 @@ so_loop
  bra so_loop
 so_done
  tfr u,pc
- 
+
+charout_hex
+ pshs a,y,x
+ ldy #hex_ascii
+ lsra
+ lsra
+ lsra
+ lsra
+ lda a,y
+ jsr chrout
+ lda ,s
+ anda #$0f
+ lda a,y
+ jsr chrout
+ puls a,y,x
+ rts
+
+hex_ascii fcc "0123456789ABCDEF"
+
 chrout
 #
 # subroutine
