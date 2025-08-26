@@ -33,7 +33,6 @@ unknown_message
  fcn "\rUNKNOWN MMU.\r"
 
 init_gime
- clr $71 # force cold start on reset
  lda #$ff
  sta gime_flag
  lda #$38
@@ -44,7 +43,6 @@ init_gime
  bra init_common
 
 init_jr
- clr $71 # force cold start on reset
 # flag Jr
  lda #$0
  sta gime_flag
@@ -76,6 +74,7 @@ ram_loop
  bne ram_loop
 
 init_common
+ clr $71 # force cold start on reset
  bsr turn_off_ints
 # turn on mmu, task 0, no const ram (for both gime and jr)
  lda #$c4
@@ -92,7 +91,7 @@ main_menu
  fcc "2MB AWARE\r"
  fcc "1) COUNT AVAILABLE MMU BANKS\r"
  fcc "-) MMU SLOT REGISTER WIDTH\r"
- fcc "-) TEST TASK SWITCHING\r"
+ fcc "3) TEST TASK SWITCHING\r"
  fcc "-) TEST CONSTANT RAM\r"
  fcc "5) SHOW VDG WRAP AROUND\r"
  fcn "6) FAST TIMER TEST\r"
@@ -138,7 +137,7 @@ mm_done
 jump_table
  fdb count_mmu_blocks
  fdb return
- fdb return
+ fdb test_task_switching
  fdb return
  fdb vdg_wrap
  fdb timer_test
@@ -505,7 +504,158 @@ tt_isr_irq
  lda $ff92 # clear the irq interrupt
  lda $ff93 # Also clear the firq interrupt
  rti
+
+test_task_switching
+# Copy current slot 2 and 3 to task 1
+ bsr strout
+ fcn "COPY CURRENT SLOT 2 AND 3 TO TASK 1\r"
+ lda $ffa2
+ sta $ffaa
+ lda $ffa3
+ sta $ffab
+
+# Switch to task 1
+ bsr strout
+ fcn "SWITCH TO TASK 1\r"
+ lda gime_1
+ ora #%00000001
+ sta gime_1
+ sta $ff91
+
+# set task 0 slot 4,5 to 3e and 3f
+# set task 1 slot 4,5 to 3f and 3e
+ bsr strout
+ fcc "SET TASK 0 SLOT 4,5 TO 3E AND 3F"
+ fcn "SET TASK 1 SLOT 4,5 TO 3F AND 3E"
+ lda #$3e
+ sta $ffa4
+ sta $ffad
+ lda #$3f
+ sta $ffa5
+ sta $ffac
  
+# write to $8000-$9fff
+ bsr strout
+ fcn "WRITE TO $8000-$9FFF\r"
+ lda #19 # random seed
+ sta randomseed
+ ldx #$8000
+tts_loop1
+ bsr randomeor
+ sta ,x+
+ cmpx #$a000
+ bne tts_loop1
+ 
+# switch to task 0
+ bsr strout
+ fcn "SWITCH TO TASK 0\r"
+ lda gime_1
+ anda #%11111110
+ sta gime_1
+ sta $ff91
+
+# test $a000-$bfff, expect pass
+ bsr strout
+ fcn "TEST $A000-$BFFF\r"
+ lda #19 # random seed
+ sta randomseed
+ ldx #$a000
+tts_loop2
+ bsr randomeor
+ cmpa ,x+
+ bne tts_fail
+ cmpx #$c000
+ bne tts_loop2
+
+# write to $8000-$9fff
+ bsr strout
+ fcn "WRITE TO $8000-$9FFF\r"
+ lda #154 # different random seed
+ sta randomseed
+ ldx #$8000
+tts_loop3
+ bsr randomeor
+ sta ,x+
+ cmpx #$a000
+ bne tts_loop3
+
+# switch to task 1
+ bsr strout
+ fcn "SWITCH TO TASK 1\r"
+ lda gime_1
+ ora #%00000001
+ sta gime_1
+ sta $ff91
+
+# test $8000-$9fff expect fail
+ bsr strout
+ fcn "TEST $8000-$9FFF\r"
+ lda #$ff
+ sta tts_pass_flag
+ lda #154 # different random seed
+ sta randomseed
+ ldx #$8000
+tts_loop4
+ bsr randomeor
+ cmpa ,x+
+ beq tts_skip
+ clr tts_pass_flag
+tts_skip
+ cmpx #$a000
+ bne tts_loop4
+ lda tts_pass_flag
+ beq tts_pass
+ bra tts_fail
+ 
+tts_pass_flag rmb 1
+
+# pass
+tts_pass
+ bsr strout
+ fcn "PASS\r"
+ bra tts_done
+
+tts_fail
+ bsr strout
+ fcn "FAIL\r"
+ 
+# switch to task 0
+tts_done
+ lda gime_1
+ anda #%11111110
+ sta gime_1
+ sta $ff91
+ rts
+
+# ---------------------------------------------------------------
+# RandomEor sub
+# Pick random number from 0 to 255
+# Entry: randomseed
+# Exit: A = number produced
+# Uses a,b
+# ---------------------------------------------------------------
+randomeor:
+ ldb randomseed # get last random number
+ beq doeor # handle input of zero
+ aslb # shift it left, clear bit zero
+ beq rndready # if the input was $80, skip the eor
+ bcc rndready # if the carry is now clear skip the eor
+doeor:
+ eorb #$1d # eor with magic number %00011101
+rndready:
+ stb randomseed # save the output as the new seed
+# adjust result to desired range, if necessary
+ lda 2,s # a = max, as passed by caller
+ cmpa #255 # if max is 255, nothing to do
+ beq redone
+ inca # a = max + 1
+ mul # a = random number in appropriate range
+redone:
+ rts          
+
+randomseed rmb 1  
+    
+# 
 #
 # subroutine
 # Store reg a into sam video offset register

@@ -14,6 +14,17 @@ Option 1:
  - 80: 1024k - $00 to $7f"
  - 00: 2048k - $00 to $ff"
 
+Option 3:
+1. Copy current slot 2 and 3 to task 1
+2. Switch to task 1
+3. set task 0 slot 4,5 to 3e,3f
+4. set task 1 slot 4,5 to 3f,3e
+5. write to $8000-$9fff,
+6. switch to task 0
+7. test $a000-$bfff, expect pass
+8. write to $8000-$9fff
+9. switch to task 1
+10. test $8000-$9fff expect fail
 
 Option 5:
 1. Setup PMODE 4 screen.
