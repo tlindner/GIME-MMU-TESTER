@@ -543,12 +543,7 @@ test_task_switching
  sta $ffab
 
 # Switch to task 1
- bsr strout
- fcn "SWITCH TO TASK 1\r"
- lda gime_1
- ora #%00000001
- sta gime_1
- sta $ff91
+ bsr switch_to_task_1
 
 # set task 0 slot 4,5 to 3e and 3f
 # set task 1 slot 4,5 to 3f and 3e
@@ -575,13 +570,8 @@ tts_loop1
  bne tts_loop1
  
 # switch to task 0
- bsr strout
- fcn "SWITCH TO TASK 0\r"
- lda gime_1
- anda #%11111110
- sta gime_1
- sta $ff91
-
+ bsr switch_to_task_0
+ 
 # test $a000-$bfff, expect pass
  bsr strout
  fcn "TEST $A000-$BFFF\r"
@@ -608,12 +598,7 @@ tts_loop3
  bne tts_loop3
 
 # switch to task 1
- bsr strout
- fcn "SWITCH TO TASK 1\r"
- lda gime_1
- ora #%00000001
- sta gime_1
- sta $ff91
+ bsr switch_to_task_1
 
 # test $8000-$9fff expect fail
  bsr strout
@@ -649,20 +634,65 @@ tts_fail
  
 # switch to task 0
 tts_done
- lda gime_1
- anda #%11111110
- sta gime_1
- sta $ff91
+ bsr switch_to_task_0
  rts
 
 test_constant_ram
+# switch to task 0
+ jsr switch_to_task_0
+
+# copy code to task 1
+ lda $ffa2
+ sta $ffaa
+ lda $ffa3
+ sta $ffab
+ 
  bsr strout
- fcn "SETUP BANKS\r"
+ fcn "SETUP BANKS (TASK 0)\r"
  lda #$3f
  sta $ffa4
  lda #$3e
  sta $ffa7
  
+ jsr do_const_ram_test
+ beq tcr_do_task_1
+tcr_fail
+# switch to task 0
+ jsr switch_to_task_0
+# bail
+ bsr strout
+ fcn "FAIL\r"
+ rts
+
+tcr_do_task_1
+ bsr strout
+ fcn "PASS\r"
+# switch to task 1
+ jsr switch_to_task_1
+
+ bsr strout
+ fcn "SETUP BANKS (TASK 1)\r"
+ lda #$3f
+ sta $ffac
+ lda #$3e
+ sta $ffaf
+
+# clear out test buffers
+ lda #0
+ ldx #$fe00
+ jsr write_seed_256
+ lda #0
+ ldx #$9e00
+ jsr write_seed_256
+
+ jsr do_const_ram_test
+ bne tcr_fail
+ bsr switch_to_task_0 
+ bsr strout
+ fcn "PASS\r"
+ rts
+ 
+do_const_ram_test 
  bsr strout
  fcn "TURN ON CONST RAM\r"
  lda gime_0
@@ -681,7 +711,7 @@ test_constant_ram
  lda #87
  ldx #$9e00
  jsr test_seed_256
- bne tcr_fail
+ bne do_tcr_fail
  
  bsr strout
  fcn "TURN OFF CONST RAM\r"
@@ -701,17 +731,16 @@ test_constant_ram
  lda #87
  ldx #$9e00
  jsr test_seed_256
- bne tcr_fail
+ bne do_tcr_fail
 
- bsr strout
- fcn "PASS\r"
+ orcc #%00000100 # set z, pass
  rts
  
-tcr_fail
- bsr strout
- fcn "FAIL\r"
+do_tcr_fail
+ andcc #%11111011 # clear z, fail
  rts
 
+# subroutine
 write_seed_256
  sta randomseed
  tfr x,d
@@ -724,6 +753,7 @@ ws256_loop
  bne ws256_loop
  puls x,pc
  
+# subroutine
 test_seed_256
  sta randomseed
  tfr x,d
@@ -742,6 +772,25 @@ ts256_fail
  andcc #%11111011 # clear z
  puls x,pc
 
+# subroutine
+switch_to_task_1
+ bsr strout
+ fcn "SWITCH TO TASK 1\r"
+ lda gime_1
+ ora #%00000001
+ bra stt1_entry
+
+# subroutine
+switch_to_task_0
+ bsr strout
+ fcn "SWITCH TO TASK 0\r"
+ lda gime_1
+ anda #%11111110
+stt1_entry
+ sta gime_1
+ sta $ff91
+ rts
+ 
 
 
 
