@@ -92,7 +92,7 @@ main_menu
  fcc "1) COUNT AVAILABLE MMU BANKS\r"
  fcc "-) MMU SLOT REGISTER WIDTH\r"
  fcc "3) TEST TASK SWITCHING\r"
- fcc "-) TEST CONSTANT RAM\r"
+ fcc "4) TEST CONSTANT RAM\r"
  fcc "5) SHOW VDG WRAP AROUND\r"
  fcn "6) SLOW TIMER TEST\r"
 init_loop
@@ -138,7 +138,7 @@ jump_table
  fdb count_mmu_blocks
  fdb return
  fdb test_task_switching
- fdb return
+ fdb test_constant_ram
  fdb vdg_wrap
  fdb timer_test
 
@@ -655,6 +655,96 @@ tts_done
  sta $ff91
  rts
 
+test_constant_ram
+ bsr strout
+ fcn "SETUP BANKS\r"
+ lda #$3f
+ sta $ffa4
+ lda #$3e
+ sta $ffa7
+ 
+ bsr strout
+ fcn "TURN ON CONST RAM\r"
+ lda gime_0
+ ora #%00001000
+ sta gime_0
+ sta $ff90
+ 
+ bsr strout
+ fcn "WRITE SEED #87 TO $FE00-$FEFF\r"
+ lda #87
+ ldx #$fe00
+ jsr write_seed_256
+ 
+ bsr strout
+ fcn "TEST SEED #87 ON $9E00-$9EFF\r"
+ lda #87
+ ldx #$9e00
+ jsr test_seed_256
+ bne tcr_fail
+ 
+ bsr strout
+ fcn "TURN OFF CONST RAM\r"
+ lda gime_0
+ anda #%11110111
+ sta gime_0
+ sta $ff90
+
+ bsr strout
+ fcn "WRITE SEED #92 TO $FE00-$FEFF\r"
+ lda #92
+ ldx #$fe00
+ jsr write_seed_256
+
+ bsr strout
+ fcn "TEST SEED #87 ON $9E00-$9EFF\r"
+ lda #87
+ ldx #$9e00
+ jsr test_seed_256
+ bne tcr_fail
+
+ bsr strout
+ fcn "PASS\r"
+ rts
+ 
+tcr_fail
+ bsr strout
+ fcn "FAIL\r"
+ rts
+
+write_seed_256
+ sta randomseed
+ tfr x,d
+ addd #$100
+ pshs d
+ws256_loop
+ jsr randomeor
+ sta ,x+
+ cmpx ,s
+ bne ws256_loop
+ puls x,pc
+ 
+test_seed_256
+ sta randomseed
+ tfr x,d
+ addd #$100
+ pshs d
+ts256_loop
+ jsr randomeor
+ cmpa ,x+
+ bne ts256_fail
+ cmpx ,s
+ bne ts256_loop
+ts256_pass
+ orcc #%00000100 # set z
+ puls x,pc
+ts256_fail
+ andcc #%11111011 # clear z
+ puls x,pc
+
+
+
+
 # ---------------------------------------------------------------
 # RandomEor sub
 # Pick random number from 0 to 255
@@ -672,13 +762,7 @@ doeor:
  eorb #$1d # eor with magic number %00011101
 rndready:
  stb randomseed # save the output as the new seed
-# adjust result to desired range, if necessary
- lda 2,s # a = max, as passed by caller
- cmpa #255 # if max is 255, nothing to do
- beq redone
- inca # a = max + 1
- mul # a = random number in appropriate range
-redone:
+ tfr b,a
  rts          
 
 randomseed rmb 1  

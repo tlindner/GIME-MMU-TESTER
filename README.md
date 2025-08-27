@@ -14,7 +14,7 @@ Option 1, Count avaiable mmu banks:
 4. Check for table anomaly:
  - The 256 entry result table should contain number incrementing by 1 from start to finish
  - If there is less than 2mb of RAM, the table should repeat.
- - If this pattern is not seen, the first table entry is reported.
+ - If this pattern is not seen, the first wrong table entry is reported.
  
 Option 2, MMU slot register width:
 
@@ -23,14 +23,22 @@ Option 3, Test task switching:
 2. Switch to task 1
 3. set task 0 slot 4,5 to 3e,3f
 4. set task 1 slot 4,5 to 3f,3e
-5. write to $8000-$9fff,
+5. write seed #19 to $8000-$9fff,
 6. switch to task 0
 7. test $a000-$bfff, expect pass
-8. write to $8000-$9fff
+8. write seed #154 to $8000-$9fff
 9. switch to task 1
 10. test $8000-$9fff expect fail
 
 Option 4, Test constant ram:
+1. Set bank $ffa4 to $3f (task 0, slot 5, $8000-$9fff)
+2. Set bank $ffa7 to $3e (task 0, slot 7, $e000-$ffff)
+3. Turn on const ram
+4. Write seed #87 to $fe00-$feff
+5. Test seed #87 on $9e00-$9eff, pass if match
+6. Turn off const ram
+7. Write seed #92 to $fe00-$feff
+8. Test seed #87 on $9e00-$9eff, pass if match
 
 Option 5, Show VDG wrap around:
 1. Setup PMODE 4 screen.
