@@ -488,7 +488,7 @@ tt_dec1
  subd #1
  std timer_value
  bra tt_loop
-hex fcb 48,49,50,51,52,53,54,54,56,57,1,2,3,4,5,6
+hex fcb 48,49,50,51,52,53,54,55,56,57,1,2,3,4,5,6
 save_pia0a rmb 1
 save_pia0b rmb 1
 save_palette rmb 1

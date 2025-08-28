@@ -560,7 +560,7 @@
 6641 830001           (        gmmut.asm):00488          subd #1
 6644 FD6697           (        gmmut.asm):00489          std timer_value
 6647 2092             (        gmmut.asm):00490          bra tt_loop
-6649 3031323334353636 (        gmmut.asm):00491         hex fcb 48,49,50,51,52,53,54,54,56,57,1,2,3,4,5,6
+6649 3031323334353637 (        gmmut.asm):00491         hex fcb 48,49,50,51,52,53,54,55,56,57,1,2,3,4,5,6
      3839010203040506
 6659                  (        gmmut.asm):00492         save_pia0a rmb 1
 665A                  (        gmmut.asm):00493         save_pia0b rmb 1
