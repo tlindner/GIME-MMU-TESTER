@@ -850,7 +850,7 @@ tr_pass
  fcn "PASS\r"
  rts
 tr_fail
- pshs a,x
+ pshs a,y
 # Set Sam to text mode
  lda #$00
  sta $ffc0
@@ -862,12 +862,12 @@ tr_fail
  lda #%00000010
  bsr store_a_into_sam_offset
  bsr strout
- fcn "FAIL BITS:"
+ fcn "FAIL BITS: $"
  puls a
  bsr charout_hex
 
  bsr strout
- fcn "\rFAIL address: "
+ fcn "\rFAIL ADDRESS: $"
  puls a
  bsr charout_hex
  puls a

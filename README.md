@@ -40,7 +40,10 @@ Option 4, Test constant ram:
 7. Write seed #92 to $fe00-$feff
 8. Test seed #87 on $9e00-$9eff, pass if match
 
-Option 5, Show VDG wrap around:
+Option 5:
+1. MarchU memory test
+
+Option 6, Show VDG wrap around:
 1. Setup PMODE 4 screen.
 2. Change base addres to $FE00
 3. Write text on the following graphics pages:
@@ -55,7 +58,7 @@ Option 5, Show VDG wrap around:
 6. A GIME in a CoCo 3 will wrap from page 3f to 0.
 7. Currently, Mame will wrap from 3f, to 40.
 
-Option 6, slow Timer Test:
+Option 7, slow Timer Test:
 1. Turn off PIA interrupts
 2. Set GIME FIRQ to timer
 3. Set GIME IRQ to Vertical blanking

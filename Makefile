@@ -24,7 +24,7 @@ dsk:	bin
 	decb copy -r -2 gmmut.bin gmmut.dsk,GMMUT.BIN
 
 bin:	gmmut.asm marchu_6809.asm
-	$(AS) $(ASOUT)gmmut.bin gmmut.asm $(AFLAGS) --list=gmmut.lst --decb
+	$(AS) $(ASOUT)gmmut.bin gmmut.asm $(AFLAGS) --list=gmmut.lst --decb -i
 
 clean:
 	-rm $(BINS) $(DSKS)
