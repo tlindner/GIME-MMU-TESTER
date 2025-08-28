@@ -241,19 +241,33 @@ rc_printTable
 rc_loop
  cmpa ,x+
  beq rc_pass
+ leax -1,x
+ pshs a
+ ldb ,x
+ pshs b
  ldd #buffer
  pshs d
- leax -1,x
  pshs x
  bsr strout
- fcn "ANOMALY FOUND IN TABLE POSITION: "
+ fcn "ANOMALY IN TABLE POSITION: "
  puls d
  subd ,s++
  tfr b,a
  jsr charout_hex
  bsr strout
  fcn "\r"
+ bsr strout
+ fcn "EXPECTED: "
+ puls a
+ jsr charout_hex
+ bsr strout
+ fcn "\rFOUND: "
+ puls a
+ jsr charout_hex
+ bsr strout
+ fcn "\r"
  rts
+
 rc_pass
  cmpx #buffer+256
  beq rc_done
@@ -274,8 +288,6 @@ vdg_wrap
  fcc "SET TO $FE00.\r"
  fcc "THE WRAP AROUND MMU PAGE WILL BE IDENTIFIED."
  fcn "\rPRESS ANY KEY TO CONTINUE\r\r"
-
-vw_wait
  bsr wait
 
 # Set Sam to PMODE 4
