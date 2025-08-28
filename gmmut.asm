@@ -93,8 +93,9 @@ main_menu
  fcc "-) MMU SLOT REGISTER WIDTH\r"
  fcc "3) TEST TASK SWITCHING\r"
  fcc "4) TEST CONSTANT RAM\r"
- fcc "5) SHOW VDG WRAP AROUND\r"
- fcn "6) SLOW TIMER TEST\r"
+ fcc "5) TEST RAM\r"
+ fcc "6) SHOW VDG WRAP AROUND\r"
+ fcn "7) SLOW TIMER TEST\r"
 init_loop
  decb
  bne mm_skip
@@ -114,7 +115,7 @@ mm_skip
  bsr chrout
  ldb ,s
  subb #'1
- cmpb #5
+ cmpb #6
  bhi mm_done
  lslb
  ldx #jump_table
@@ -122,7 +123,7 @@ mm_skip
 done_after
  ldb ,s
  subb #'1
- cmpb #5
+ cmpb #6
  bhi mm_done
  lslb
  ldx #post_jump_table
@@ -139,11 +140,13 @@ jump_table
  fdb return
  fdb test_task_switching
  fdb test_constant_ram
+ fdb test_ram
  fdb vdg_wrap
  fdb timer_test
 
 post_jump_table
  fdb report_count_mmu
+ fdb return
  fdb return
  fdb return
  fdb return
@@ -815,7 +818,66 @@ rndready:
  rts          
 
 randomseed rmb 1  
-    
+
+test_ram
+ bsr strout
+ fcn "TEST ONLY RAM PAGE 34 (BETA)\r"
+# Set Sam to PMODE 4
+ lda #%11110000
+ sta $ffc5
+ sta $ffc3
+ sta $ffc0
+ sta $ff22
+# set SAM to highest base address ($8000)
+# for video
+ lda #$40
+ bsr store_a_into_sam_offset
+
+ bsr mu_start
+ bne tr_fail
+tr_pass
+# Set Sam to text mode
+ lda #$00
+ sta $ffc0
+ sta $ffc2
+ sta $ffc4
+ sta $ff22
+# set SAM to text screen base address ($0400)
+# for video
+ lda #%00000010
+ bsr store_a_into_sam_offset
+ bsr strout
+ fcn "PASS\r"
+ rts
+tr_fail
+ pshs a,x
+# Set Sam to text mode
+ lda #$00
+ sta $ffc0
+ sta $ffc2
+ sta $ffc4
+ sta $ff22
+# set SAM to text screen base address ($0400)
+# for video
+ lda #%00000010
+ bsr store_a_into_sam_offset
+ bsr strout
+ fcn "FAIL BITS:"
+ puls a
+ bsr charout_hex
+
+ bsr strout
+ fcn "\rFAIL address: "
+ puls a
+ bsr charout_hex
+ puls a
+ bsr charout_hex
+ bsr strout
+ fcn "\r"
+ rts
+ 
+ include "marchu_6809.asm"
+
 # 
 #
 # subroutine
