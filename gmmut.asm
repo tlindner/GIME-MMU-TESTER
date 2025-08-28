@@ -83,7 +83,10 @@ init_common
  lda #$0
  sta gime_1
  sta $ff91
-
+# init casflg
+ lda #$ff
+ sta casflg
+ 
 main_menu
  bsr clear_screen
  bsr strout
