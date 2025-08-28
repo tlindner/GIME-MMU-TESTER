@@ -174,6 +174,15 @@ count_bocks_loop
  clrb
  ldx #buffer
 count_loop
+
+### test code
+ pshs b
+ ldb buffer+$38
+ cmpb #$b8
+ beq found_error_in_38
+ puls b
+### test code
+ 
  stb $ffa1
  lda $2000
  sta ,x+
@@ -193,6 +202,18 @@ restore_loop
  bne restore_loop
  bsr restore_task_0
  rts 
+
+### test code
+found_error_in_38
+ bsr strout
+ fcc "FOUND $B8 IN $38 DURING\r"
+ fcn "COPY FROM BANK: $"
+ puls a
+ jsr charout_hex
+ bsr strout
+ fcn "\rTO TABLE\rIGNOGE FOLLOFING REPORTING\r"
+ rts
+### test code
 
 report_count_mmu
  lda out_param
