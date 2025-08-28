@@ -820,15 +820,17 @@ rndready:
 randomseed rmb 1  
 
 test_ram
+ lda #$3c
+ sta $ffa4
  bsr strout
- fcn "TEST ONLY RAM PAGE 34 (BETA)\r"
+ fcn "TEST ONLY RAM PAGE $3C (BETA)\r"
 # Set Sam to PMODE 4
  lda #%11110000
  sta $ffc5
  sta $ffc3
  sta $ffc0
  sta $ff22
-# set SAM to highest base address ($8000)
+# set SAM to base address ($8000)
 # for video
  lda #$40
  bsr store_a_into_sam_offset

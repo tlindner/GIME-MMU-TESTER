@@ -42,6 +42,7 @@ Option 4, Test constant ram:
 
 Option 5:
 1. MarchU memory test
+ - Currently on page 3C
 
 Option 6, Show VDG wrap around:
 1. Setup PMODE 4 screen.
