@@ -5,7 +5,7 @@
 Option 1, Count avaiable mmu banks:
 1. Write block number to first byte of each block, 0 to 255, in order
 2. Copy first byte of each block to buffer
-3. First byte of buffer will indicate how many block are avaiable
+3. First byte of buffer will indicate how many blocks are avaiable
  - f0:  128k - $30 to $3f
  - e0:  256k - $20 to $3f
  - c0:  512k - $00 to $3f
@@ -42,7 +42,7 @@ Option 4, Test constant ram:
 
 Option 5:
 1. MarchU memory test
- - Currently on page 3C
+ - Currently only page 3C
 
 Option 6, Show VDG wrap around:
 1. Setup PMODE 4 screen.

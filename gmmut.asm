@@ -191,7 +191,57 @@ cb_loop2
  sta out_param
  rts 
 
+print_8_bytes
+ pshs x
+ lda ,s
+ bsr charout_hex
+ lda 1,s
+ bsr charout_hex
+ bsr strout
+ fcn ":"
+ puls x
+ ldb #8
+p8b_loop
+ pshs b,x
+ bsr strout
+ fcn " "
+ puls b,x
+ lda ,x+
+ pshs d,x
+ bsr charout_hex
+ puls d,x
+ decb
+ bne p8b_loop
+ bsr strout
+ fcn "\r"
+ rts
+ 
+print_8_row
+ ldb #8
+p8w_loop
+ pshs b,x
+ bsr print_8_bytes
+ puls b,x
+ leax 8,x
+ decb
+ bne p8w_loop
+ rts
+ 
 report_count_mmu
+
+ ldx #buffer+(0*64)
+ jsr print_8_row 
+ jsr wait
+ ldx #buffer+(1*64)
+ jsr print_8_row 
+ jsr wait
+ ldx #buffer+(2*64)
+ jsr print_8_row 
+ jsr wait
+ ldx #buffer+(3*64)
+ jsr print_8_row 
+ jsr wait
+
  lda out_param
  cmpa #$f0
  beq rc_128k
