@@ -191,57 +191,8 @@ cb_loop2
  sta out_param
  rts 
 
-print_8_bytes
- pshs x
- lda ,s
- bsr charout_hex
- lda 1,s
- bsr charout_hex
- bsr strout
- fcn ":"
- puls x
- ldb #8
-p8b_loop
- pshs b,x
- bsr strout
- fcn " "
- puls b,x
- lda ,x+
- pshs d,x
- bsr charout_hex
- puls d,x
- decb
- bne p8b_loop
- bsr strout
- fcn "\r"
- rts
- 
-print_8_row
- ldb #8
-p8w_loop
- pshs b,x
- bsr print_8_bytes
- puls b,x
- leax 8,x
- decb
- bne p8w_loop
- rts
  
 report_count_mmu
-
- ldx #buffer+(0*64)
- jsr print_8_row 
- jsr wait
- ldx #buffer+(1*64)
- jsr print_8_row 
- jsr wait
- ldx #buffer+(2*64)
- jsr print_8_row 
- jsr wait
- ldx #buffer+(3*64)
- jsr print_8_row 
- jsr wait
-
  lda out_param
  cmpa #$f0
  beq rc_128k
@@ -323,6 +274,19 @@ rs_fail
  jsr charout_hex
  bsr strout
  fcn "\r"
+# print entire buffer
+ ldx #buffer+(0*64)
+ jsr print_8_row 
+ jsr wait
+ ldx #buffer+(1*64)
+ jsr print_8_row 
+ jsr wait
+ ldx #buffer+(2*64)
+ jsr print_8_row 
+ jsr wait
+ ldx #buffer+(3*64)
+ jsr print_8_row 
+ jsr wait
  rts
 
  
@@ -867,7 +831,47 @@ tom_entry
  sta $ff90
  rts
 
-
+#
+# subroutine
+#
+print_8_bytes
+ pshs x
+ lda ,s
+ bsr charout_hex
+ lda 1,s
+ bsr charout_hex
+ bsr strout
+ fcn ":"
+ puls x
+ ldb #8
+p8b_loop
+ pshs b,x
+ bsr strout
+ fcn " "
+ puls b,x
+ lda ,x+
+ pshs d,x
+ bsr charout_hex
+ puls d,x
+ decb
+ bne p8b_loop
+ bsr strout
+ fcn "\r"
+ rts
+ 
+#
+# subroutine
+#
+print_8_row
+ ldb #8
+p8w_loop
+ pshs b,x
+ bsr print_8_bytes
+ puls b,x
+ leax 8,x
+ decb
+ bne p8w_loop
+ rts
 
 # ---------------------------------------------------------------
 # RandomEor sub
@@ -892,48 +896,80 @@ rndready:
 randomseed rmb 1  
 
 test_ram
- lda #$3c
- sta $ffa4
+ bsr count_mmu_blocks
+ lda out_param
+ cmpa #$f0
+ beq tr_128k
+ cmpa #$e0
+ beq tr_256k
+ cmpa #$c0
+ beq tr_512k
+ cmpa #$80
+ beq tr_1024k
+ cmpa #$00
+ beq tr_2048k
+# unknown amount of RAM
  bsr strout
- fcn "TEST ONLY RAM PAGE $3C (BETA)\r"
-# Set Sam to PMODE 4
- lda #%11110000
- sta $ffc5
- sta $ffc3
- sta $ffc0
- sta $ff22
-# set SAM to base address ($8000)
-# for video
- lda #$40
- bsr store_a_into_sam_offset
-
+ fcn "UNKNOWN AMOUNT OF RAM.\rFAIL\r"
+ rts
+# start bank, end back+1
+tr_128k
+ ldd #$3040
+ pshs d
+ bra tr_start
+tr_256k
+ ldd #$2040
+ pshs d
+ bra tr_start
+tr_512k
+ ldd #$0040
+ pshs d
+ bra tr_start
+tr_1024k
+ ldd #$0080
+ pshs d
+ bra tr_start
+tr_2048k
+ ldd #$0000
+ pshs d
+ bra tr_start
+ 
+tr_start 
+tr_main_loop
+ jsr keyin
+ cmpa #0
+ bne tr_abort
+ lda ,s
+ sta $ffa4
+ cmpa #$38 # skip screen location
+ beq tr_next
+ cmpa #$3a # skip stack page
+ beq tr_next
+ cmpa #$3b # skip code page
+ beq tr_next
+# Write page number
+ jsr charout_hex
+ bsr strout
+ fcn ": MMU PAGE UNDER TEST\r"
  bsr mu_start
  bne tr_fail
+tr_next 
+ inc ,s
+ lda ,s
+ cmpa 1,s
+ bne tr_main_loop
+ bra tr_pass
+tr_abort
+ bsr strout
+ fcn "ABORT\r"
 tr_pass
-# Set Sam to text mode
- lda #$00
- sta $ffc0
- sta $ffc2
- sta $ffc4
- sta $ff22
-# set SAM to text screen base address ($0400)
-# for video
- lda #%00000010
- bsr store_a_into_sam_offset
+ puls x
  bsr strout
  fcn "PASS\r"
  rts
 tr_fail
+ puls x
  pshs a,y
-# Set Sam to text mode
- lda #$00
- sta $ffc0
- sta $ffc2
- sta $ffc4
- sta $ff22
-# set SAM to text screen base address ($0400)
-# for video
- lda #%00000010
  bsr store_a_into_sam_offset
  bsr strout
  fcn "FAIL BITS: $"
@@ -952,7 +988,6 @@ tr_fail
  
  include "marchu_6809.asm"
 
-# 
 #
 # subroutine
 # Store reg a into sam video offset register
@@ -992,20 +1027,20 @@ turn_on_ints
  
 saved_task rmb 8
  
-restore_task_0
 #
 # subroutine
 # restore mmu regs at ffa0
 #
+restore_task_0
  ldy #saved_task
  ldx #$ffa0
  bra copy_task
  
-save_task_0
 #
 # subroutine
 # save mmu regs at ffa0
 #
+save_task_0
  ldy #$ffa0
  ldx #saved_task
 copy_task
@@ -1019,11 +1054,11 @@ copy_task
  std ,x++
  rts
 
-clear_screen
 #
 # subroutine
 # clear the text screen
 #
+clear_screen
  ldx #$0400
  ldd #$6060
 cs_loop
@@ -1034,11 +1069,11 @@ cs_loop
  clr text_position+1
  rts
  
-strout
 #
 # subroutine
 # Output string to screen
 #
+strout
  puls u
 so_loop
  lda ,u+
@@ -1066,11 +1101,11 @@ charout_hex
 
 hex_ascii fcc "0123456789ABCDEF"
 
-chrout
 #
 # subroutine
 # output to text screen
 #
+chrout
  cmpa #$0d
  beq co_carrage_return
  cmpa #$60
@@ -1119,30 +1154,24 @@ co_clear_last_line_loop
  std text_position
  rts
 
-wait
 #
 # subroutine
 #
-wait_loop
+wait
  jsr keyin
  cmpa #0
- beq wait_loop
+ beq wait
  rts
  
+# subroutine
+# this routine gets a keystroke from the keyboard if a key
+# is down. it returns zero true if there was no key down.
+# Copied from Color BASIC
+
 pia0 equ $ff00
 keybuf rmb 8 keyboard memory buffer
 casflg rmb 1 upper case/lower case flag: $ff=upper, 0=lower
 
-# la1c1 clr pia0+2 clear column strobe
-#  lda pia0 read key rows
-#  coma complement row data
-#  asla shift off joystick data
-#  beq la244 return if no keys or fire buttons down
-#
-# subroutine
-# this routine gets a keystroke from the keyboard if a key
-# is down. it returns zero true if there was no key down.
-#
 keyin pshs u,x,b save registers
  ldu #pia0 point u to pia0
  ldx #keybuf point x to keyboard memory buffer
@@ -1259,11 +1288,8 @@ contab fcb $5e,$5f up arrow
  fcb $03,$03 break
  fcb $40,$13 at sign
 
-
-
-
 buffer rmb 256
-buffer2 rmb 256
+
 bitmap_font
  fcb $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff ( )
  fcb $e7,$c3,$c3,$e7,$e7,$ff,$e7,$ff (!)

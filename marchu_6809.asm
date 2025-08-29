@@ -105,9 +105,13 @@ mem_error
  andcc #%11111011 # clear z
  rts
 
+# test_table
+#  fcb $80,$40,$20,$10
+#  fcb $08,$04,$02,$01
+#  fcb $00,$FF,$A5,$5A 
+# test_table_end equ *
+ 
 test_table
- fcb $80,$40,$20,$10
- fcb $08,$04,$02,$01
- fcb $00,$FF,$A5,$5A 
+ fcb $A5,$5A 
 test_table_end equ *
  
