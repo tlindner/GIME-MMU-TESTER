@@ -160,63 +160,44 @@ return
  rts
 	
 count_mmu_blocks
- bsr save_task_0
+ bsr switch_to_task_0
+ bsr turn_on_mmu
+#  bsr save_task_0
 # Put mmu block number in first byte of each block
-# and save value
- clrb
- ldx #buffer2
-count_bocks_loop
- stb $ffa1
- lda $2000
- sta ,x+
- stb $2000
- incb
- bne count_bocks_loop
-# fill buffer with what is
-# left in the first byte of each block
+# and save previous value
  clrb
  ldx #buffer
-count_loop
-
-### test code
- pshs b
- ldb buffer+$38
- cmpb #$b8
- beq found_error_in_38
- puls b
-### test code
- 
- stb $ffa1
- lda $2000
+ ldy #buffer2
+cb_loop1
+ stb $ffa4
+ lda $8000
  sta ,x+
+ stb $8000
+ stb ,y+
  incb
- bne count_loop
+ bne cb_loop1
+
+# fill buffer with what is
+# left in the first byte of each block
+# and restore value
+ ldx #buffer
+ clrb
+ ldy #0
+cb_loop2
+ stb $ffa4
+ lda $8000
+ ldb ,x
+ sta ,x+
+ stb $8000
+ leay 1,y
+ tfr y,d
+ cmpb #0
+ bne cb_loop2
 # report first byte of buffer
  lda buffer
  sta out_param
-# fix up overwritten bytes
- clrb
- ldx #buffer2
-restore_loop
- stb $ffa1
- lda ,x+
- sta $2000
- incb
- bne restore_loop
- bsr restore_task_0
+ bsr wait
  rts 
-
-### test code
-found_error_in_38
- bsr strout
- fcc "FOUND $B8 IN $38 DURING\r"
- fcn "COPY FROM BANK: $"
- puls a
- jsr charout_hex
- bsr strout
- fcn "\rTO TABLE\rIGNOGE FOLLOFING REPORTING\r"
- rts
-### test code
 
 report_count_mmu
  lda out_param
@@ -264,7 +245,19 @@ rc_printTable
  ldx #buffer
 rc_loop
  cmpa ,x+
- beq rc_pass
+ bne rs_fail
+ cmpx #buffer+256
+ beq rc_done
+ inca
+ cmpa #0
+ bne rc_loop
+ lda out_param
+
+ bra rc_loop
+rc_done
+ rts
+
+rs_fail
  leax -1,x
  pshs a
  ldb ,x
@@ -273,35 +266,23 @@ rc_loop
  pshs d
  pshs x
  bsr strout
- fcn "ANOMALY IN TABLE POSITION: "
+ fcn "ANOMALY IN TABLE POSITION: $"
  puls d
  subd ,s++
  tfr b,a
  jsr charout_hex
  bsr strout
- fcn "\r"
- bsr strout
- fcn "EXPECTED: "
+ fcn "\rFOUND: $"
  puls a
  jsr charout_hex
  bsr strout
- fcn "\rFOUND: "
+ fcn "\rEXPECTED: $"
  puls a
  jsr charout_hex
  bsr strout
  fcn "\r"
  rts
 
-rc_pass
- cmpx #buffer+256
- beq rc_done
- inca
- cmpa #0
- bne rc_loop
- lda out_param
- bra rc_loop
-rc_done
- rts
  
 vdg_wrap
  bsr save_task_0
@@ -830,6 +811,19 @@ stt1_entry
  sta $ff91
  rts
  
+#subroutine
+turn_off_mmu
+ lda gime_0
+ anda #%10111111
+ bra tom_entry
+#subroutine
+turn_on_mmu
+ lda gime_0
+ ora #%01000000
+tom_entry
+ sta gime_0
+ sta $ff90
+ rts
 
 
 
