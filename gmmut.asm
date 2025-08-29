@@ -162,18 +162,15 @@ return
 count_mmu_blocks
  bsr switch_to_task_0
  bsr turn_on_mmu
+ bsr turn_off_ints
 #  bsr save_task_0
 # Put mmu block number in first byte of each block
 # and save previous value
  clrb
  ldx #buffer
- ldy #buffer2
 cb_loop1
  stb $ffa4
- lda $8000
- sta ,x+
  stb $8000
- stb ,y+
  incb
  bne cb_loop1
 
@@ -182,21 +179,16 @@ cb_loop1
 # and restore value
  ldx #buffer
  clrb
- ldy #0
 cb_loop2
  stb $ffa4
  lda $8000
- ldb ,x
  sta ,x+
- stb $8000
- leay 1,y
- tfr y,d
- cmpb #0
+ incb
+ cmpx #buffer+256
  bne cb_loop2
 # report first byte of buffer
  lda buffer
  sta out_param
- bsr wait
  rts 
 
 report_count_mmu
