@@ -33,6 +33,7 @@ unknown_message
  fcn "\rUNKNOWN MMU.\r"
 
 init_gime
+# don't use stack
  lda #$ff
  sta gime_flag
  lda #$38
@@ -43,6 +44,7 @@ init_gime
  bra init_common
 
 init_jr
+# don't use stack
 # flag Jr
  lda #$0
  sta gime_flag
@@ -74,6 +76,7 @@ ram_loop
  bne ram_loop
 
 init_common
+ lds #stack # initialize our stack
  clr $71 # force cold start on reset
  bsr turn_off_ints
 # turn on mmu, task 0, no const ram (for both gime and jr)
@@ -943,8 +946,6 @@ tr_main_loop
  sta $ffa4
  cmpa #$38 # skip screen location
  beq tr_next
- cmpa #$3a # skip stack page
- beq tr_next
  cmpa #$3b # skip code page
  beq tr_next
 # Write page number
@@ -970,7 +971,6 @@ tr_pass
 tr_fail
  puls x
  pshs a,y
- bsr store_a_into_sam_offset
  bsr strout
  fcn "FAIL BITS: $"
  puls a
@@ -1387,10 +1387,15 @@ bitmap_font
  fcb $1f,$cf,$cf,$e3,$cf,$cf,$1f,$ff (})
  fcb $89,$23,$ff,$ff,$ff,$ff,$ff,$ff (~)
  fcb $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff ( )
+
+ rmb 32 stack space
  
- IFGT *-$7fff
+ IFGT *-$7ffe
  ERROR "Program to large"
  ENDC
+
+ org $8000-1
+stack equ *
 
  end start
  
