@@ -5,13 +5,15 @@
 Option 1, Count avaiable mmu banks:
 1. Write block number to first byte of each block, 0 to 255, in order
 2. Copy first byte of each block to buffer
-3. First byte of buffer will indicate how many blocks are avaiable
+3. Do again for last byte of each block.
+4. Each buffer should match exactly.
+5. First byte of buffer will indicate how many blocks are avaiable
  - f0:  128k - $30 to $3f
  - e0:  256k - $20 to $3f
  - c0:  512k - $00 to $3f
  - 80: 1024k - $00 to $7f
  - 00: 2048k - $00 to $ff
-4. Check for table anomaly:
+6. Check for table anomaly:
  - The 256 entry result table should contain number incrementing by 1 from start to finish
  - If there is less than 2mb of RAM, the table should repeat.
  - If this pattern is not seen, the first wrong table entry is reported.

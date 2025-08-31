@@ -17,7 +17,10 @@ randomseed rmb 1
 saved_task rmb 8
 keybuf rmb 8 keyboard memory buffer
 casflg rmb 1 upper case/lower case flag: $ff=upper, 0=lower
-buffer rmb 256
+first_buffer rmb 256
+last_buffer rmb 256
+which_buffer rmb 2
+check_address rmb 2
 
  ifdef CART
  rmb 32 stack space
@@ -98,13 +101,13 @@ init_common
  ifdef CART
 # copy code to RAM if on CART
  ldx #ramrom_cc3
- ldy #buffer
+ ldy #first_buffer
 code_copy_loop
  lda ,x+
  sta ,y+
  cmpx #ramrom_cc3_end
  bne code_copy_loop
- jsr buffer
+ jsr first_buffer
  bra ramrom_done
 
 ramrom_cc3
@@ -210,35 +213,62 @@ count_mmu_blocks
  bsr switch_to_task_0
  bsr turn_on_mmu
  bsr turn_off_ints
-# Put mmu block number in first byte of each block
-# and save previous value
+ 
+ ldx #first_buffer
+ stx which_buffer
+ ldx #$4000
+ stx check_address
+ bsr cmb_do
+ 
+ ldx #last_buffer
+ stx which_buffer
+ ldx #$5FFF
+ stx check_address
+ bsr cmb_do
+ rts
+ 
+# Put mmu block number in first/last byte of each block
+cmb_do
  clrb
- ldx #buffer
+ ldx which_buffer
 cb_loop1
  stb $ffa2
- stb $4000
+ stb [check_address]
  incb
  bne cb_loop1
 
 # fill buffer with what is
 # left in the first byte of each block
-# and restore value
- ldx #buffer
+ ldx which_buffer
  clrb
 cb_loop2
  stb $ffa2
- lda $4000
+ lda [check_address]
  sta ,x+
  incb
- cmpx #buffer+256
  bne cb_loop2
 # report first byte of buffer
- lda buffer
+ lda first_buffer
  sta out_param
  rts 
 
-
 report_count_mmu
+# compare two buffers, they should be equal
+ ldx #first_buffer
+ ldy #last_buffer
+ clrb
+rcm_compare_loop
+ lda ,x+
+ cmpa ,y+
+ bne rcm_compare_fail
+ decb
+ bne rcm_compare_loop
+ bra rcm_compare_pass
+rcm_compare_fail
+ bsr strout
+ fcn "FIRST BYTE BUFFER DOES NOT EQUALLAST BYTE BUFFER.\rBAIL\r"
+ rts
+rcm_compare_pass
  lda out_param
  cmpa #$f0
  beq rc_128k
@@ -275,17 +305,17 @@ rc_2048k
 rc_printTable
  bsr strout
  fcn "FIRST BYTE OF TABLE: "
- lda buffer
+ lda first_buffer
  jsr charout_hex
  bsr strout
  fcn "\r"
 # look for anomaly in table
  lda out_param
- ldx #buffer
+ ldx #first_buffer
 rc_loop
  cmpa ,x+
  bne rs_fail
- cmpx #buffer+256
+ cmpx #first_buffer+256
  beq rc_done
  inca
  cmpa #0
@@ -301,7 +331,7 @@ rs_fail
  pshs a
  ldb ,x
  pshs b
- ldd #buffer
+ ldd #first_buffer
  pshs d
  pshs x
  bsr strout
@@ -321,16 +351,16 @@ rs_fail
  bsr strout
  fcn "\r"
 # print entire buffer
- ldx #buffer+(0*64)
+ ldx #first_buffer+(0*64)
  jsr print_8_row 
  jsr wait
- ldx #buffer+(1*64)
+ ldx #first_buffer+(1*64)
  jsr print_8_row 
  jsr wait
- ldx #buffer+(2*64)
+ ldx #first_buffer+(2*64)
  jsr print_8_row 
  jsr wait
- ldx #buffer+(3*64)
+ ldx #first_buffer+(3*64)
  jsr print_8_row 
  jsr wait
  rts
