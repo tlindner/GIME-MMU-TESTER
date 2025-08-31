@@ -990,11 +990,10 @@ tr_main_loop
  sta $ffa4
  cmpa #$38 # skip screen location
  beq tr_next
- 
+ cmpa #$3b # heap/stack/code location
+ beq tr_next
  ifdef CART
- cmpa #$3e # skip code page
- else
- cmpa #$3b # skip code page
+ cmpa #$3e # skip cartridge code page
  endif
  
  beq tr_next
