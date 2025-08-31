@@ -1,12 +1,19 @@
 # GIME-MMU-Tester
 
+This is a program to test the Color Computer 3's GIME chip.
+Everything non-graphical is fair game. It has code to test for the
+presence of a CoCo Mem Jr., and will accommodate it as necessary.
+
+This project produces a DECB binary file useable with LOADM.
+It also produces a raw binary suitable for a Program Pak ROM.
+
 ## Progress
 
 Option 1, Count avaiable mmu banks:
 1. Write block number to first byte of each block, 0 to 255, in order
 2. Copy first byte of each block to buffer
 3. Do again for last byte of each block.
-4. Each buffer should match exactly.
+4. Each buffer should match exactly. Bail if not.
 5. First byte of buffer will indicate how many blocks are avaiable
  - f0:  128k - $30 to $3f
  - e0:  256k - $20 to $3f
