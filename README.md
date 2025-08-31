@@ -51,7 +51,7 @@ Option 4, Test constant ram:
 
 Option 5:
 1. MarchU memory test
- - Currently uses two patterns $55 and $aa
+ - Currently uses two patterns: $A5, $5A
  - Only test pages with no heap, stack or code
  - Skip otherwise
  - Does not test page overlap
