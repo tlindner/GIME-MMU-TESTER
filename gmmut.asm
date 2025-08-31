@@ -1,5 +1,6 @@
  PRAGMA autobranchlength
  PRAGMA cescapes
+
  org $6001
 out_param rmb 1
 gime_flag rmb 1 # boolean; true if gime, false if jr
@@ -8,7 +9,22 @@ text_address rmb 2 # address of text screen
 text_position rmb 2 # cursor offset
 gime_0 rmb 1 shadow register
 gime_1 rmb 1 shadow register
+save_pia0a rmb 1
+save_pia0b rmb 1
+save_palette rmb 1
+tts_pass_flag rmb 1
+randomseed rmb 1  
+saved_task rmb 8
+keybuf rmb 8 keyboard memory buffer
+casflg rmb 1 upper case/lower case flag: $ff=upper, 0=lower
+buffer rmb 256
 
+ ifdef CART
+ rmb 32 stack space
+stack equ *
+ org $C000
+ endif
+ 
 start
 init_tests
 # Test for coco3
@@ -64,19 +80,47 @@ init_jr_loop
  sta text_block
  ldd #$0400
  std text_address
-# change to all ram mode
+# # change to all ram mode
+#  ldx #$8000
+#  bsr turn_off_ints # need to turn off interrupts before swapping in RAM
+# ram_loop
+#  sta $ffde
+#  ldd ,x
+#  sta $ffdf
+#  std ,x++
+#  cmpx #$ff00
+#  bne ram_loop
+
+init_common
+ bsr turn_off_ints  
+ lds #stack # initialize our stack
+
+ ifdef CART
+# copy code to RAM if on CART
+ ldx #ramrom_cc3
+ ldy #buffer
+code_copy_loop
+ lda ,x+
+ sta ,y+
+ cmpx #ramrom_cc3_end
+ bne code_copy_loop
+ jsr buffer
+ bra ramrom_done
+
+ramrom_cc3
  ldx #$8000
- bsr turn_off_ints   # need to turn off interrupts before swapping in RAM
-ram_loop
+ram_cc3_loop
  sta $ffde
  ldd ,x
  sta $ffdf
  std ,x++
  cmpx #$ff00
- bne ram_loop
-
-init_common
- lds #stack # initialize our stack
+ bne ram_cc3_loop
+ rts
+ramrom_cc3_end equ *
+ramrom_done equ *
+ endif
+ 
  clr $71 # force cold start on reset
  bsr turn_off_ints
 # turn on mmu, task 0, no const ram (for both gime and jr)
@@ -166,14 +210,13 @@ count_mmu_blocks
  bsr switch_to_task_0
  bsr turn_on_mmu
  bsr turn_off_ints
-#  bsr save_task_0
 # Put mmu block number in first byte of each block
 # and save previous value
  clrb
  ldx #buffer
 cb_loop1
- stb $ffa4
- stb $8000
+ stb $ffa2
+ stb $4000
  incb
  bne cb_loop1
 
@@ -183,8 +226,8 @@ cb_loop1
  ldx #buffer
  clrb
 cb_loop2
- stb $ffa4
- lda $8000
+ stb $ffa2
+ lda $4000
  sta ,x+
  incb
  cmpx #buffer+256
@@ -194,7 +237,7 @@ cb_loop2
  sta out_param
  rts 
 
- 
+
 report_count_mmu
  lda out_param
  cmpa #$f0
@@ -292,16 +335,16 @@ rs_fail
  jsr wait
  rts
 
- 
 vdg_wrap
  bsr save_task_0
 # explain what is going to happen
  bsr strout
- fcc "\rTHE NEXT SCREEN WILL BE A PMODE 4 "
- fcc "GRAPHICS SCREEN WITH THE START ADDRESS "
- fcc "SET TO $FE00.\r"
- fcc "THE WRAP AROUND MMU PAGE WILL BE IDENTIFIED."
- fcn "\rPRESS ANY KEY TO CONTINUE\r\r"
+ fcc "THE NEXT SCREEN WILL BE A\r"
+ fcc "PMODE 4 GRAPHICS SCREEN WITH\r"
+ fcc "THE START ADDRESS SET TO $FE00.\r"
+ fcc "THE WRAP AROUND MMU PAGE WILL\r"
+ fcc "BE IDENTIFIED.\r"
+ fcn "PRESS ANY KEY TO CONTINUE\r"
  bsr wait
 
 # Set Sam to PMODE 4
@@ -515,9 +558,6 @@ tt_dec1
  std timer_value
  bra tt_loop
 hex fcb 48,49,50,51,52,53,54,55,56,57,1,2,3,4,5,6
-save_pia0a rmb 1
-save_pia0b rmb 1
-save_palette rmb 1
 tt_cleanup
  bsr turn_off_ints
 # turn off gime interrupts
@@ -563,23 +603,31 @@ tt_isr_irq
  rti
 
 test_task_switching
-# Copy current slot 2 and 3 to task 1
+# Copy current code, heap, and stack to task 1
+
  bsr strout
- fcn "COPY CURRENT SLOT 2 AND 3 TO TASK 1\r"
- lda $ffa2
- sta $ffaa
+
+ ifdef CART
+ fcn "COPY CURRENT SLOT 3 AND 6 TO\rTASK 1\r"
  lda $ffa3
  sta $ffab
-
+ lda $ffa6
+ sta $ffae
+ else
+ fcn "COPY CURRENT SLOT 3 TO TASK 1\r"
+ lda $ffa3
+ sta $ffab
+ endif
+ 
 # Switch to task 1
  bsr switch_to_task_1
 
 # set task 0 slot 4,5 to 3e and 3f
 # set task 1 slot 4,5 to 3f and 3e
  bsr strout
- fcc "SET TASK 0 SLOT 4,5 TO 3E AND 3F"
- fcn "SET TASK 1 SLOT 4,5 TO 3F AND 3E"
- lda #$3e
+ fcc "SET TASK 0 SLOT 4,5 TO 30 AND 3F"
+ fcn "SET TASK 1 SLOT 4,5 TO 3F AND 30"
+ lda #$30
  sta $ffa4
  sta $ffad
  lda #$3f
@@ -648,8 +696,6 @@ tts_skip
  lda tts_pass_flag
  beq tts_pass
  bra tts_fail
- 
-tts_pass_flag rmb 1
 
 # pass
 tts_pass
@@ -680,7 +726,7 @@ test_constant_ram
  fcn "SETUP BANKS (TASK 0)\r"
  lda #$3f
  sta $ffa4
- lda #$3e
+ lda #$30
  sta $ffa7
  
  jsr do_const_ram_test
@@ -896,8 +942,6 @@ rndready:
  tfr b,a
  rts          
 
-randomseed rmb 1  
-
 test_ram
  bsr count_mmu_blocks
  lda out_param
@@ -946,7 +990,13 @@ tr_main_loop
  sta $ffa4
  cmpa #$38 # skip screen location
  beq tr_next
+ 
+ ifdef CART
+ cmpa #$3e # skip code page
+ else
  cmpa #$3b # skip code page
+ endif
+ 
  beq tr_next
 # Write page number
  jsr charout_hex
@@ -1024,8 +1074,6 @@ turn_off_ints
 turn_on_ints
  andcc #$af
  rts
- 
-saved_task rmb 8
  
 #
 # subroutine
@@ -1169,8 +1217,6 @@ wait
 # Copied from Color BASIC
 
 pia0 equ $ff00
-keybuf rmb 8 keyboard memory buffer
-casflg rmb 1 upper case/lower case flag: $ff=upper, 0=lower
 
 keyin pshs u,x,b save registers
  ldu #pia0 point u to pia0
@@ -1288,8 +1334,6 @@ contab fcb $5e,$5f up arrow
  fcb $03,$03 break
  fcb $40,$13 at sign
 
-buffer rmb 256
-
 bitmap_font
  fcb $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff ( )
  fcb $e7,$c3,$c3,$e7,$e7,$ff,$e7,$ff (!)
@@ -1388,14 +1432,25 @@ bitmap_font
  fcb $89,$23,$ff,$ff,$ff,$ff,$ff,$ff (~)
  fcb $ff,$ff,$ff,$ff,$ff,$ff,$ff,$ff ( )
 
+ ifdef CART
+ 
+ IFGT *-$dfff
+ ERROR "Cartridge program to large"
+ ENDC
+ 
+ else
+
  rmb 32 stack space
  
  IFGT *-$7ffe
- ERROR "Program to large"
+ ERROR "DECB program to large"
  ENDC
-
+ 
  org $8000-1
 stack equ *
+
+ endif
+
 
  end start
  

@@ -21,8 +21,8 @@ Option 2, MMU slot register width:
 Option 3, Test task switching:
 1. Copy current slot 2 and 3 to task 1
 2. Switch to task 1
-3. set task 0 slot 4,5 to 3e,3f
-4. set task 1 slot 4,5 to 3f,3e
+3. set task 0 slot 4,5 to 30,3f
+4. set task 1 slot 4,5 to 3f,30
 5. write seed #19 to $8000-$9fff,
 6. switch to task 0
 7. test $a000-$bfff, expect pass
@@ -32,7 +32,7 @@ Option 3, Test task switching:
 
 Option 4, Test constant ram:
 1. Set bank $ffa4 to $3f (task 0, slot 5, $8000-$9fff)
-2. Set bank $ffa7 to $3e (task 0, slot 7, $e000-$ffff)
+2. Set bank $ffa7 to $30 (task 0, slot 7, $e000-$ffff)
 3. Turn on const ram
 4. Write seed #87 to $fe00-$feff
 5. Test seed #87 on $9e00-$9eff, pass if match

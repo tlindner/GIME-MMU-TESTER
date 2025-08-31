@@ -7,6 +7,8 @@ ECHO		= echo
 
 BINS		= gmmut.bin
 DSKS		= gmmut.dsk
+ROMS		= gmmut.ccc
+LSTS		= gmmut.lst gmmut.ccc.lsgt
 
 all:	banner bin dsk $(DEPENDS)
 
@@ -25,7 +27,8 @@ dsk:	bin
 
 bin:	gmmut.asm marchu_6809.asm
 	$(AS) $(ASOUT)gmmut.bin gmmut.asm $(AFLAGS) --list=gmmut.lst --decb
+	$(AS) --define=CART $(ASOUT)gmmut.ccc gmmut.asm $(AFLAGS) --list=gmmut.ccc.lst --raw
 
 clean:
-	-rm $(BINS) $(DSKS)
+	-rm $(BINS) $(DSKS) $(ROMS) $(LSTS)
 
