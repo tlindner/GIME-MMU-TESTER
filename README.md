@@ -51,7 +51,10 @@ Option 4, Test constant ram:
 
 Option 5:
 1. MarchU memory test
- - Currently only page 3C
+ - Currently uses two patterns $55 and $aa
+ - Only test pages with no heap, stack or code
+ - Skip otherwise
+ - Does not test page overlap
 
 Option 6, Show VDG wrap around:
 1. Setup PMODE 4 screen.
