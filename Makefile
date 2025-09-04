@@ -20,7 +20,7 @@ banner:
 	@$(ECHO) "**************************"
 
 dsk:	bin
-	-rm gmmut.dsk
+	-rm -f gmmut.dsk
 	decb dskini gmmut.dsk
 	decb copy -r gmmut.bas gmmut.dsk,GMMUT.BAS -0 -t
 	decb copy -r -2 gmmut.bin gmmut.dsk,GMMUT.BIN

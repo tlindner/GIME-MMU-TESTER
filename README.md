@@ -27,6 +27,17 @@ Option 1, Count avaiable mmu banks:
  
 Option 2, MMU slot register width:
 
+ 0 ^ 1 == 1
+ 1 ^ 1 == 0
+ 
+ 0 ^ 0 == 0
+ 1 ^ 0 == 1
+ 
+1. Store and exor $ff in $ffa7
+2. report stuck low bits
+3. Store and exor $00 in $ffa7
+4. Report stuck high bits
+
 Option 3, Test task switching:
 1. Copy current slot 2 and 3 to task 1
 2. Switch to task 1

@@ -21,6 +21,7 @@ first_buffer rmb 256
 last_buffer rmb 256
 which_buffer rmb 2
 check_address rmb 2
+mmu_width_flag rmb 1
 
  ifdef CART
  rmb 32 stack space
@@ -143,7 +144,7 @@ main_menu
  fcc "GIME MMU TESTER\r"
  fcc "2MB AWARE\r"
  fcc "1) COUNT AVAILABLE MMU BANKS\r"
- fcc "-) MMU SLOT REGISTER WIDTH\r"
+ fcc "2) MMU SLOT REGISTER WIDTH\r"
  fcc "3) TEST TASK SWITCHING\r"
  fcc "4) TEST CONSTANT RAM\r"
  fcc "5) TEST RAM\r"
@@ -190,7 +191,7 @@ mm_done
 
 jump_table
  fdb count_mmu_blocks
- fdb return
+ fdb mmu_register_width
  fdb test_task_switching
  fdb test_constant_ram
  fdb test_ram
@@ -364,6 +365,54 @@ rs_fail
  jsr print_8_row 
  jsr wait
  rts
+
+mmu_register_width
+ bsr strout
+ fcn "CHECK FOR STUCK BITS IN MMU PAGETABLE:\r"
+ lda #$ff
+ sta mmu_width_flag
+ lda #$ff
+ sta $ffa7
+ eora $ffa7
+ rola
+ pshs a
+ bcs mrw_check_next1
+ bsr strout
+ fcn "BIT 7 STUCK LOW\r"
+ clr mmu_width_flag
+mrw_check_next1
+ puls a
+ rola
+ bcs mrw_check_next2 
+ bsr strout
+ fcn "BIT 6 STUCK LOW\r"
+ clr mmu_width_flag
+mrw_check_next2
+ clra
+ sta $ffa7
+ eora $ffa7
+ rola
+ pshs a
+ bcc mrw_check_next3
+ bsr strout
+ fcn "BIT 7 STUCK HIGH\r"
+ clr mmu_width_flag
+mrw_check_next3
+ puls a
+ rola
+ bcc mrw_check_next4
+ bsr strout
+ fcn "BIT 6 STUCK HIGH\r"
+ clr mmu_width_flag
+mrw_check_next4
+ lda mmu_width_flag
+ beq mrw_done
+ bsr strout
+ fcn "NO STUCK BITS\r"
+mrw_done
+ rts
+ 
+
 
 vdg_wrap
  bsr save_task_0
