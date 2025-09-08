@@ -7,8 +7,9 @@ gime_flag rmb 1 # boolean; true if gime, false if jr
 text_block rmb 1 # mmu block of text screen
 text_address rmb 2 # address of text screen
 text_position rmb 2 # cursor offset
-gime_0 rmb 1 shadow register
-gime_1 rmb 1 shadow register
+gime_0 rmb 1 # shadow register
+gime_1 rmb 1 # shadow register
+gime_video_mode rmb 1 # shadow register
 save_pia0a rmb 1
 save_pia0b rmb 1
 save_palette rmb 1
@@ -61,9 +62,13 @@ init_gime
  ldd #$0400
  std text_address
 # gime mmu slots are initialized by Color BASIC
+# get video mode from coco3 ROM for 32 col screen
+ clr gime_video_mode
  bra init_common
 
 init_jr
+# set video mode to 0
+ clr gime_video_mode
 # don't use stack
 # flag Jr
  lda #$0
@@ -143,6 +148,21 @@ main_menu
  bsr strout
  fcc "GIME MMU TESTER\r"
  fcc "2MB AWARE\r"
+ fcn "CURRENT VIDEO FREQUENCY: "
+ lda gime_video_mode
+ anda #%00001000
+ beq mm_60hz
+mm_50hz
+ bsr strout
+ fcn "5"
+ bra mm_continue
+mm_60hz
+ bsr strout
+ fcn "6"
+mm_continue
+ bsr strout
+ fcc "0HZ\r"
+ fcc "0) CHANGE VIDEO MODE FREQUENCY\r"
  fcc "1) COUNT AVAILABLE MMU BANKS\r"
  fcc "2) MMU SLOT REGISTER WIDTH\r"
  fcc "3) TEST TASK SWITCHING\r"
@@ -168,7 +188,7 @@ mm_skip
  lda #$0d
  bsr chrout
  ldb ,s
- subb #'1
+ subb #'0
  cmpb #6
  bhi mm_done
  lslb
@@ -176,7 +196,7 @@ mm_skip
  jsr [b,x]
 done_after
  ldb ,s
- subb #'1
+ subb #'0
  cmpb #6
  bhi mm_done
  lslb
@@ -190,6 +210,7 @@ mm_done
  jmp main_menu
 
 jump_table
+ fdb flip_flop_hz
  fdb count_mmu_blocks
  fdb mmu_register_width
  fdb test_task_switching
@@ -199,6 +220,7 @@ jump_table
  fdb timer_test
 
 post_jump_table
+ fdb return
  fdb report_count_mmu
  fdb return
  fdb return
@@ -209,7 +231,14 @@ post_jump_table
 
 return
  rts
-	
+
+flip_flop_hz
+ lda gime_video_mode
+ eora #%00001000
+ sta gime_video_mode
+ sta $ff98
+ rts
+ 
 count_mmu_blocks
  bsr switch_to_task_0
  bsr turn_on_mmu
@@ -369,6 +398,23 @@ rs_fail
 mmu_register_width
  bsr strout
  fcn "CHECK FOR STUCK BITS IN MMU PAGETABLE:\r"
+ 
+#  print raw results
+#  bsr strout
+#  fcn "$FF: $"
+#  lda #$ff
+#  sta $ffa7
+#  eora $ffa7
+#  bsr charout_hex
+#  bsr strout
+#  fcn "\r$00: $"
+#  lda #$0
+#  sta $ffa7
+#  eora $ffa7
+#  bsr charout_hex
+#  bsr strout
+#  fcn "\r"
+ 
  lda #$ff
  sta mmu_width_flag
  lda #$ff
@@ -376,14 +422,14 @@ mmu_register_width
  eora $ffa7
  rola
  pshs a
- bcs mrw_check_next1
+ bcc mrw_check_next1
  bsr strout
  fcn "BIT 7 STUCK LOW\r"
  clr mmu_width_flag
 mrw_check_next1
  puls a
  rola
- bcs mrw_check_next2 
+ bcc mrw_check_next2 
  bsr strout
  fcn "BIT 6 STUCK LOW\r"
  clr mmu_width_flag
