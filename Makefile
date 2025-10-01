@@ -8,22 +8,22 @@ ECHO		= echo
 BINS		= gmmut.bin
 DSKS		= gmmut.dsk
 ROMS		= gmmut.ccc
-LSTS		= gmmut.lst gmmut.ccc.lsgt
+LSTS		= gmmut.lst gmmut.ccc.lst
 
 all:	banner bin dsk $(DEPENDS)
 
 banner:
 	@$(ECHO) "**************************"
 	@$(ECHO) "*                        *"
-	@$(ECHO) "*    GIME-MMU_TESTER     *"
+	@$(ECHO) "*    GIME-MMU-TESTER     *"
 	@$(ECHO) "*                        *"
 	@$(ECHO) "**************************"
 
 dsk:	bin
 	-rm -f gmmut.dsk
 	decb dskini gmmut.dsk
-	decb copy -r gmmut.bas gmmut.dsk,GMMUT.BAS -0 -t
-	decb copy -r -2 gmmut.bin gmmut.dsk,GMMUT.BIN
+	decb copy -rt gmmut.bas gmmut.dsk,GMMUT.BAS
+	decb copy -r2b gmmut.bin gmmut.dsk,GMMUT.BIN
 
 bin:	gmmut.asm marchu_6809.asm
 	$(AS) $(ASOUT)gmmut.bin gmmut.asm $(AFLAGS) --list=gmmut.lst --decb

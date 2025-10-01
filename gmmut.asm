@@ -189,7 +189,7 @@ mm_skip
  bsr chrout
  ldb ,s
  subb #'0
- cmpb #6
+ cmpb #7
  bhi mm_done
  lslb
  ldx #jump_table
@@ -197,7 +197,7 @@ mm_skip
 done_after
  ldb ,s
  subb #'0
- cmpb #6
+ cmpb #7
  bhi mm_done
  lslb
  ldx #post_jump_table
@@ -429,7 +429,7 @@ mmu_register_width
 mrw_check_next1
  puls a
  rola
- bcc mrw_check_next2 
+ bcs mrw_check_next2 
  bsr strout
  fcn "BIT 6 STUCK LOW\r"
  clr mmu_width_flag
@@ -452,7 +452,7 @@ mrw_check_next3
  clr mmu_width_flag
 mrw_check_next4
  lda mmu_width_flag
- beq mrw_done
+ bne mrw_done
  bsr strout
  fcn "NO STUCK BITS\r"
 mrw_done
