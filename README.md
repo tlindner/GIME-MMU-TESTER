@@ -93,3 +93,9 @@ Option 7, slow Timer Test:
 8. 'A' and 'S' keys can adjust timer value by +10/-10
 9. 'Z' and 'X' keys can adjust timer value by +1/-1
 10. 'Q' to exit
+
+Option 8, MMU / no MMU Test
+1. Turn on MMU
+2. Write the block number to every block
+3. Turn off the MMU
+4. Report block numbers visible.

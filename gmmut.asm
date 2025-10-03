@@ -169,7 +169,8 @@ mm_continue
  fcc "4) TEST CONSTANT RAM\r"
  fcc "5) TEST RAM\r"
  fcc "6) SHOW VDG WRAP AROUND\r"
- fcn "7) SLOW TIMER TEST\r"
+ fcc "7) SLOW TIMER TEST\r"
+ fcn "8) NO MMU PAGE TEST\r"
 init_loop
  decb
  bne mm_skip
@@ -189,7 +190,7 @@ mm_skip
  bsr chrout
  ldb ,s
  subb #'0
- cmpb #7
+ cmpb #8
  bhi mm_done
  lslb
  ldx #jump_table
@@ -197,7 +198,7 @@ mm_skip
 done_after
  ldb ,s
  subb #'0
- cmpb #7
+ cmpb #8
  bhi mm_done
  lslb
  ldx #post_jump_table
@@ -218,10 +219,12 @@ jump_table
  fdb test_ram
  fdb vdg_wrap
  fdb timer_test
+ fdb no_mmu_test
 
 post_jump_table
  fdb return
  fdb report_count_mmu
+ fdb return
  fdb return
  fdb return
  fdb return
@@ -938,6 +941,48 @@ do_const_ram_test
  
 do_tcr_fail
  andcc #%11111011 # clear z, fail
+ rts
+
+no_mmu_test
+ bsr strout
+ fcn "TURN ON MMU\r"
+ lda gime_0
+ ora #%01000000
+ sta gime_0
+ sta $ff90
+ bsr strout
+ fcn "WRITE PAGES NUMBERS\r"
+ clrb
+nmt_loop
+ stb $ffa0
+ stb >$0
+ incb
+ bne nmt_loop
+ bsr strout
+ fcn "Turn off MMU\r"
+ lda gime_0
+ anda #%10111111
+ sta gime_0
+ sta $ff90
+ ldx #$0
+nmt_loop2
+ pshs x
+ bsr strout
+ fcn "ADDRESS $"
+ lda ,s
+ jsr charout_hex
+ lda 1,s
+ jsr charout_hex
+ bsr strout
+ fcn " HAS VALUE $"
+ ldx ,s
+ lda ,x
+ jsr charout_hex
+ bsr strout
+ fcn "\r"
+ puls x
+ leax $2000,x
+ bne nmt_loop2
  rts
 
 # subroutine
