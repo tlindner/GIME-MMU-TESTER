@@ -951,15 +951,17 @@ no_mmu_test
  sta gime_0
  sta $ff90
  bsr strout
- fcn "WRITE PAGES NUMBERS\r"
+ fcn "WRITE PAGE NUMBERS\r"
  clrb
+ lda $ffa0
 nmt_loop
  stb $ffa0
  stb >$0
  incb
  bne nmt_loop
+ sta $ffa0
  bsr strout
- fcn "Turn off MMU\r"
+ fcn "TURN OFF MMU\r"
  lda gime_0
  anda #%10111111
  sta gime_0
